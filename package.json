@@ -1,0 +1,41 @@
+{
+  "name": "shortest-edge",
+  "version": "1.0.0",
+  "description": "Find the shortest path from one point in a graph to another, including points on edges.",
+  "main": "index.js",
+  "scripts": {
+    "clean": "rm -rf dist",
+    "build": "npm run clean && tsc",
+    "lint": "tslint --project .",
+    "mocha": "mocha --compilers ts:ts-node/register,tsx:ts-node/register",
+    "mocha-watch": "mocha -w -R min --compilers ts:ts-node/register,tsx:ts-node/register",
+    "prepublish": "npm run build",
+    "test": "npm run lint && npm run mocha",
+    "watch": "rm -rf dist && tsc --watch"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dphilipson/shortest-edge.git"
+  },
+  "keywords": [
+    "dijkstra",
+    "shortest",
+    "path",
+    "edge"
+  ],
+  "author": "David Philipson <dphilipson@gmail.com> (http://dphil.me)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/dphilipson/shortest-edge/issues"
+  },
+  "homepage": "https://github.com/dphilipson/shortest-edge#readme",
+  "devDependencies": {
+    "@types/chai": "^3.4.34",
+    "@types/mocha": "^2.2.33",
+    "chai": "^3.5.0",
+    "mocha": "^3.2.0",
+    "ts-node": "^1.7.2",
+    "tslint": "^4.1.1",
+    "typescript": "^2.1.4"
+  }
+}
