@@ -75,7 +75,12 @@ export default class Graph {
     }
 
     public getEndpointsOfEdge(edgeId: EdgeId): [Node, Node] {
-        return unimplemented();
+        const edge = this.edgesById.get(edgeId);
+        if (!edge) {
+            throw new Error(`Edge ID ${edgeId} does not exist`);
+        }
+        const { startNodeId, endNodeId } = edge;
+        return [this.nodesById.get(startNodeId), this.nodesById.get(endNodeId)];
     }
 
     public getOtherEndpoint(edgeId: EdgeId, nodeId: NodeId): Node {

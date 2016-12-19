@@ -1,6 +1,7 @@
 import * as chai from "chai";
 import Graph from "../src/graph";
 import { SimpleEdge, SimpleNode } from "../src/types";
+import * as TestGraphs from "./testGraphs";
 
 const { expect } = chai;
 
@@ -43,31 +44,31 @@ describe("getAllNodes()", () => {
     });
 
     it("should return a node with no edges if it is entire graph", () => {
-        const node = getSingleNode().getAllNodes()[0];
+        const node = TestGraphs.getSingleNode().getAllNodes()[0];
         expect(node.id).to.equal(0);
         expect(node.location).to.deep.equal({ x: 0, y: 0 });
         expect(node.edgeIds).to.be.empty;
     });
 
     it("should return nodes with edge between them on such a graph", () => {
-        const nodes = getTwoNodesConnectedByEdge().getAllNodes();
+        const nodes = TestGraphs.getTwoNodesConnectedByEdge().getAllNodes();
         expect(nodes).to.have.lengthOf(2);
         const [nodeA, nodeB] = nodes;
-        expect(nodeA.id).to.equal(0);
-        expect(nodeB.id).to.equal(1);
-        expect(nodeA.edgeIds).to.deep.equal([0]);
-        expect(nodeB.edgeIds).to.deep.equal([0]);
+        expect(nodeA.id).to.equal("A");
+        expect(nodeB.id).to.equal("B");
+        expect(nodeA.edgeIds).to.deep.equal(["AB"]);
+        expect(nodeB.edgeIds).to.deep.equal(["AB"]);
     });
 });
 
 describe("getNode()", () => {
     it("should return the requested node", () => {
-        const node = getSingleNode().getNode(0);
+        const node = TestGraphs.getSingleNode().getNode(0);
         expect(node.id).to.equal(0);
     });
 
     it("should return undefined if node does not exist", () => {
-        expect(getSingleNode().getNode(1)).to.be.undefined;
+        expect(TestGraphs.getSingleNode().getNode(1)).to.be.undefined;
     });
 });
 
@@ -78,12 +79,12 @@ describe("getAllEdges()", () => {
     });
 
     it("should return the edge on a graph with a single edge", () => {
-        const edges = getTwoNodesConnectedByEdge().getAllEdges();
+        const edges = TestGraphs.getTwoNodesConnectedByEdge().getAllEdges();
         expect(edges).to.have.lengthOf(1);
         const [edge] = edges;
-        expect(edge.id).to.equal(0);
-        expect(edge.startNodeId).to.equal(0);
-        expect(edge.endNodeId).to.equal(1);
+        expect(edge.id).to.equal("AB");
+        expect(edge.startNodeId).to.equal("A");
+        expect(edge.endNodeId).to.equal("B");
         expect(edge.innerLocations).to.be.empty;
         expect(edge.length).to.equal(1);
     });
@@ -91,24 +92,35 @@ describe("getAllEdges()", () => {
 
 describe("getEdge()", () => {
     it("should return the requested edge", () => {
-        const edge = getTwoNodesConnectedByEdge().getEdge(0);
-        expect(edge.id).to.equal(0);
+        const edge = TestGraphs.getTwoNodesConnectedByEdge().getEdge("AB");
+        expect(edge.id).to.equal("AB");
     });
 
     it("should return undefined if edge does not exist", () => {
-        expect(getTwoNodesConnectedByEdge().getEdge(1)).to.be.undefined;
+        expect(TestGraphs.getTwoNodesConnectedByEdge().getEdge(1)).to.be.undefined;
     });
 });
 
 describe("getEdgesOfNode()", () => {
     it("should return edges with node as their endpoint", () => {
-        const edges = getTriangle().getEdgesOfNode("A");
+        const edges = TestGraphs.getTriangle().getEdgesOfNode("A");
         const edgeIds = edges.map((edge) => edge.id).sort();
         expect(edgeIds).to.deep.equal(["AB", "CA"]);
     });
 
     it("should throw on nonexistent node ID", () => {
-        expect(() => getTriangle().getEdgesOfNode(-1)).to.throw(new RegExp("-1"));
+        expect(() => TestGraphs.getTriangle().getEdgesOfNode(-1)).to.throw(/-1/);
+    });
+});
+
+describe("getEndpointsOfEdge()", () => {
+    it("should return nodes at ends of edge", () => {
+        const endpoints = TestGraphs.getTriangle().getEndpointsOfEdge("CA");
+        expect(endpoints.map((node) => node.id)).to.deep.equal(["C", "A"]);
+    });
+
+    it("should throw on nonexistent edge ID", () => {
+        expect(() => TestGraphs.getTriangle().getEndpointsOfEdge(-1)).to.throw(/-1/);
     });
 });
 
@@ -138,29 +150,3 @@ describe("distances", () => {
         expect(edge.length).to.equal(10);
     });
 });
-
-function getSingleNode(): Graph {
-    const node = { id: 0, location: { x: 0, y: 0 } };
-    return new Graph([node], []);
-}
-
-function getTwoNodesConnectedByEdge(): Graph {
-    const nodeA = { id: 0, location: { x: 0, y: 0 } };
-    const nodeB = { id: 1, location: { x: 1, y: 0 } };
-    const edgeAB = { id: 0, startNodeId: 0, endNodeId: 1 };
-    return new Graph([nodeA, nodeB], [edgeAB]);
-};
-
-function getTriangle(): Graph {
-    const nodes: SimpleNode[] = [
-        { id: "A", location: { x: 0, y: 0 } },
-        { id: "B", location: { x: 1, y: 0 } },
-        { id: "C", location: { x: 0, y: 1 } },
-    ];
-    const edges: SimpleEdge[] = [
-        { id: "AB", startNodeId: "A", endNodeId: "B" },
-        { id: "BC", startNodeId: "B", endNodeId: "C" },
-        { id: "CA", startNodeId: "C", endNodeId: "A" },
-    ];
-    return new Graph(nodes, edges);
-}
