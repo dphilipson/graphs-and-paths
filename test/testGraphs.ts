@@ -6,7 +6,7 @@ export function getSingleNode(): Graph {
     return new Graph([node], []);
 }
 
-export function getTwoNodesConnectedByEdge(): Graph {
+export function getTwoNodes(): Graph {
     const nodeA = { id: "A", location: { x: 0, y: 0 } };
     const nodeB = { id: "B", location: { x: 1, y: 0 } };
     const edgeAB = { id: "AB", startNodeId: "A", endNodeId: "B" };

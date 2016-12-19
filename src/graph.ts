@@ -1,4 +1,4 @@
-import { distance, pathLength, unimplemented } from "./math";
+import { getIntermediateLocation, getPathLength, unimplemented } from "./math";
 import {
     Edge,
     EdgeId,
@@ -41,7 +41,7 @@ export default class Graph {
             const startLocation = start.location;
             const endLocation = end.location;
             const path = [startLocation, ...innerLocations, endLocation];
-            const length = pathLength(path);
+            const length = getPathLength(path);
             start.edgeIds.push(id);
             end.edgeIds.push(id);
             edgesById.set(id, { id, startNodeId, endNodeId, length, innerLocations });
@@ -67,30 +67,49 @@ export default class Graph {
     }
 
     public getEdgesOfNode(nodeId: NodeId): Edge[] {
+        return this.getNodeOrThrow(nodeId).edgeIds.map((edgeId) => this.getEdgeOrThrow(edgeId));
+    }
+
+    public getEndpointsOfEdge(edgeId: EdgeId): [Node, Node] {
+        const { startNodeId, endNodeId } = this.getEdgeOrThrow(edgeId);
+        return [this.getNodeOrThrow(startNodeId), this.getNodeOrThrow(endNodeId)];
+    }
+
+    public getOtherEndpoint(edgeId: EdgeId, nodeId: NodeId): Node {
+        const edge = this.getEdgeOrThrow(edgeId);
+        if (edge.startNodeId === nodeId) {
+            return this.getNodeOrThrow(edge.endNodeId);
+        } else if (edge.endNodeId === nodeId) {
+            return this.getNodeOrThrow(edge.startNodeId);
+        } else {
+            throw new Error(`Node ${nodeId} is not an endpoint of edge ${edgeId}`);
+        }
+    }
+
+    public getNeighbors(nodeId: NodeId): Node[] {
+        return this.getNodeOrThrow(nodeId).edgeIds
+            .map((edgeId) => this.getOtherEndpoint(edgeId, nodeId));
+    }
+
+    public getLocation(edgePoint: EdgePoint): Location {
+        const { edgeId, distance } = edgePoint;
+        const [startNode, endNode] = this.getEndpointsOfEdge(edgeId);
+        return getIntermediateLocation(startNode.location, endNode.location, distance);
+    }
+
+    private getNodeOrThrow(nodeId: NodeId): Node {
         const node = this.nodesById.get(nodeId);
         if (!node) {
             throw new Error(`Node ID ${nodeId} does not exist`);
         }
-        return node.edgeIds.map((edgeId) => this.edgesById.get(edgeId));
+        return node;
     }
 
-    public getEndpointsOfEdge(edgeId: EdgeId): [Node, Node] {
+    private getEdgeOrThrow(edgeId: EdgeId): Edge {
         const edge = this.edgesById.get(edgeId);
         if (!edge) {
             throw new Error(`Edge ID ${edgeId} does not exist`);
         }
-        const { startNodeId, endNodeId } = edge;
-        return [this.nodesById.get(startNodeId), this.nodesById.get(endNodeId)];
-    }
-
-    public getOtherEndpoint(edgeId: EdgeId, nodeId: NodeId): Node {
-        return unimplemented();
-    }
-
-    public getNeighbors(nodeId: NodeId): Node[] {
-        return unimplemented();
-    }
-    public getLocation(edgePoint: EdgePoint): Location {
-        return unimplemented();
+        return edge;
     }
 }

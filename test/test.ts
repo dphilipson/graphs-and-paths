@@ -1,9 +1,7 @@
-import * as chai from "chai";
+import { expect } from "chai";
 import Graph from "../src/graph";
-import { SimpleEdge, SimpleNode } from "../src/types";
+import { Location, SimpleEdge, SimpleNode } from "../src/types";
 import * as TestGraphs from "./testGraphs";
-
-const { expect } = chai;
 
 describe("constructor", () => {
     it("should fail if node ID is repeated", () => {
@@ -51,7 +49,7 @@ describe("getAllNodes()", () => {
     });
 
     it("should return nodes with edge between them on such a graph", () => {
-        const nodes = TestGraphs.getTwoNodesConnectedByEdge().getAllNodes();
+        const nodes = TestGraphs.getTwoNodes().getAllNodes();
         expect(nodes).to.have.lengthOf(2);
         const [nodeA, nodeB] = nodes;
         expect(nodeA.id).to.equal("A");
@@ -79,7 +77,7 @@ describe("getAllEdges()", () => {
     });
 
     it("should return the edge on a graph with a single edge", () => {
-        const edges = TestGraphs.getTwoNodesConnectedByEdge().getAllEdges();
+        const edges = TestGraphs.getTwoNodes().getAllEdges();
         expect(edges).to.have.lengthOf(1);
         const [edge] = edges;
         expect(edge.id).to.equal("AB");
@@ -92,12 +90,12 @@ describe("getAllEdges()", () => {
 
 describe("getEdge()", () => {
     it("should return the requested edge", () => {
-        const edge = TestGraphs.getTwoNodesConnectedByEdge().getEdge("AB");
+        const edge = TestGraphs.getTwoNodes().getEdge("AB");
         expect(edge.id).to.equal("AB");
     });
 
     it("should return undefined if edge does not exist", () => {
-        expect(TestGraphs.getTwoNodesConnectedByEdge().getEdge(1)).to.be.undefined;
+        expect(TestGraphs.getTwoNodes().getEdge(1)).to.be.undefined;
     });
 });
 
@@ -124,7 +122,64 @@ describe("getEndpointsOfEdge()", () => {
     });
 });
 
-describe("distances", () => {
+describe("getOtherEndpoint()", () => {
+    it("should return the other endpoint of an edge", () => {
+        const endpoint = TestGraphs.getTwoNodes().getOtherEndpoint("AB", "A");
+        expect(endpoint.id).to.equal("B");
+    });
+
+    it("should throw on nonexistent edge ID", () => {
+        expect(() => TestGraphs.getTwoNodes().getOtherEndpoint("TD", "A")).to.throw(/TD/);
+    });
+
+    it("should throw if node is not an endpoint of edge", () => {
+        expect(() => TestGraphs.getTriangle().getOtherEndpoint("AB", "C")).to.throw(/endpoint/);
+    });
+});
+
+describe("getNeighbors()", () => {
+    it("should return the neighbors of a node", () => {
+        const neighbors = TestGraphs.getTriangle().getNeighbors("A");
+        expect(neighbors.map((node) => node.id).sort()).to.deep.equal(["B", "C"]);
+    });
+
+    it("should throw nonexistent node ID", () => {
+        expect(() => TestGraphs.getTriangle().getNeighbors("TD")).to.throw(/TD/);
+    });
+});
+
+describe("getLocation()", () => {
+    it("should return the correct location on an edge with no inner points", () => {
+        const nodes: SimpleNode[] = [
+            { id: "A", location: { x: 10, y: 10 } },
+            { id: "B", location: { x: 40, y: 50 } },
+        ];
+        const edges: SimpleEdge[] = [{ id: "AB", startNodeId: "A", endNodeId: "B" }];
+        const graph = new Graph(nodes, edges);
+        const distances = [0, 10, 50];
+        const expectedLocations: Location[] = [
+            { x: 10, y: 10 },
+            { x: 16, y: 18 },
+            { x: 40, y: 50 },
+        ];
+        const actualLocations = distances.map((distance) => graph.getLocation({ edgeId: "AB", distance }));
+        expect(actualLocations).to.deep.equal(expectedLocations);
+    });
+
+    it("should throw on nonexistent edgeId", () => {
+        expect(() => TestGraphs.getTriangle().getLocation({ edgeId: "TD", distance: 0 })).to.throw(/TD/);
+    });
+
+    it("should throw on negative distance", () => {
+        expect(() => TestGraphs.getTriangle().getLocation({ edgeId: "AB", distance: -1 })).to.throw(/-1/);
+    });
+
+    it("should throw on distance greater than edge length", () => {
+        expect(() => TestGraphs.getTriangle().getLocation({ edgeId: "AB", distance: 10 })).to.throw(/10/);
+    });
+});
+
+describe("lengths", () => {
     it("should be correct for edge with no inner locations", () => {
         const nodes: SimpleNode[] = [
             { id: 0, location: { x: 1, y: 1 } },
