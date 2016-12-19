@@ -166,6 +166,30 @@ describe("getLocation()", () => {
         expect(actualLocations).to.deep.equal(expectedLocations);
     });
 
+    it("should return the correct location on an edge with inner points", () => {
+        // Path is a "stairwell" with two steps.
+        const nodes: SimpleNode[] = [
+            { id: "A", location: { x: 0, y: 0 } },
+            { id: "B", location: { x: 2, y: 2 } },
+        ];
+        const edges: SimpleEdge[] = [{
+            id: "AB",
+            startNodeId: "A",
+            endNodeId: "B",
+            innerLocations: [{ x: 1, y: 0 }, { x: 1, y: 1 }, { x: 2, y: 1 }],
+        }];
+        const graph = new Graph(nodes, edges);
+        const distances = [0, 1, 2.5, 4];
+        const expectedLocations: Location[] = [
+            { x: 0, y: 0 },
+            { x: 1, y: 0 },
+            { x: 1.5, y: 1 },
+            { x: 2, y: 2 },
+        ];
+        const actualLocations = distances.map((distance) => graph.getLocation({ edgeId: "AB", distance }));
+        expect(actualLocations).to.deep.equal(expectedLocations);
+    });
+
     it("should throw on nonexistent edgeId", () => {
         expect(() => TestGraphs.getTriangle().getLocation({ edgeId: "TD", distance: 0 })).to.throw(/TD/);
     });

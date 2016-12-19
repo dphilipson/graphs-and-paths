@@ -12,13 +12,31 @@ export function getPathLength(path: Location[]): number {
     }
 }
 
-export function getIntermediateLocation(start: Location, end: Location, distance: number): Location {
+export function getDistanceAlongPath(path: Location[], distance: number): Location {
+    if (distance < 0) {
+        throw new Error(`Distance cannot be negative, but was ${distance}`);
+    }
+    let distanceLeft = distance;
+    for (let i = 0, limit = path.length - 1; i < limit; i++) {
+        const segmentStart = path[i];
+        const segmentEnd = path[i + 1];
+        const segmentLength = distanceBetween(segmentStart, segmentEnd);
+        if (distanceLeft <= segmentLength) {
+            return getIntermediateLocation(segmentStart, segmentEnd, distanceLeft);
+        } else {
+            distanceLeft -= segmentLength;
+        }
+    }
+    throw new Error(`Distance ${distance} was greater than the path length`);
+}
+
+function getIntermediateLocation(start: Location, end: Location, distance: number): Location {
     if (distance < 0) {
         throw new Error(`Distance cannot be negative, but was ${distance}`);
     }
     const length = distanceBetween(start, end);
     if (distance > length) {
-        throw new Error(`Distance ${distance} was greater than lenth between endpoints ${length}`);
+        throw new Error(`Distance ${distance} was greater than length ${length} between endpoints`);
     }
     const t = distance / length;
     return {

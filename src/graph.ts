@@ -1,4 +1,4 @@
-import { getIntermediateLocation, getPathLength, unimplemented } from "./math";
+import { getDistanceAlongPath, getPathLength, unimplemented } from "./math";
 import {
     Edge,
     EdgeId,
@@ -93,8 +93,10 @@ export default class Graph {
 
     public getLocation(edgePoint: EdgePoint): Location {
         const { edgeId, distance } = edgePoint;
+        const { innerLocations } = this.getEdgeOrThrow(edgeId);
         const [startNode, endNode] = this.getEndpointsOfEdge(edgeId);
-        return getIntermediateLocation(startNode.location, endNode.location, distance);
+        const path = [startNode.location, ...innerLocations, endNode.location];
+        return getDistanceAlongPath(path, distance);
     }
 
     private getNodeOrThrow(nodeId: NodeId): Node {
