@@ -1,8 +1,6 @@
 import * as chai from "chai";
-import Graph, {
-    SimpleEdge,
-    SimpleNode,
-} from "../src/index";
+import Graph from "../src/graph";
+import { SimpleEdge, SimpleNode } from "../src/types";
 
 const { expect } = chai;
 
@@ -12,7 +10,7 @@ describe("constructor", () => {
             { id: 0, location: { x: 0, y: 0 } },
             { id: 0, location: { x: 0, y: 1 } },
         ];
-        expect(() => new Graph(nodes, [])).to.throw(Error);
+        expect(() => new Graph(nodes, [])).to.throw(/0/);
     });
 
     it("should fail if edge ID is repeated", () => {
@@ -25,7 +23,7 @@ describe("constructor", () => {
             { id: 0, startNodeId: 0, endNodeId: 1 },
             { id: 0, startNodeId: 1, endNodeId: 2 },
         ];
-        expect(() => new Graph(nodes, edges)).to.throw(Error);
+        expect(() => new Graph(nodes, edges)).to.throw(/0/);
     });
 
     it("should fail if edge references nonexistent node", () => {
@@ -34,7 +32,7 @@ describe("constructor", () => {
             { id: 1, location: { x: 0, y: 1 } },
         ];
         const edges: SimpleEdge[] = [{ id: 0, startNodeId: 0, endNodeId: 2 }];
-        expect(() => new Graph(nodes, edges)).to.throw(Error);
+        expect(() => new Graph(nodes, edges)).to.throw(/2/);
     });
 });
 
@@ -102,6 +100,45 @@ describe("getEdge()", () => {
     });
 });
 
+describe("getEdgesOfNode()", () => {
+    it("should return edges with node as their endpoint", () => {
+        const edges = getTriangle().getEdgesOfNode("A");
+        const edgeIds = edges.map((edge) => edge.id).sort();
+        expect(edgeIds).to.deep.equal(["AB", "CA"]);
+    });
+
+    it("should throw on nonexistent node ID", () => {
+        expect(() => getTriangle().getEdgesOfNode(-1)).to.throw(new RegExp("-1"));
+    });
+});
+
+describe("distances", () => {
+    it("should be correct for edge with no inner locations", () => {
+        const nodes: SimpleNode[] = [
+            { id: 0, location: { x: 1, y: 1 } },
+            { id: 1, location: { x: 4, y: -3 } },
+        ];
+        const edges: SimpleEdge[] = [{ id: 0, startNodeId: 0, endNodeId: 1 }];
+        const edge = new Graph(nodes, edges).getEdge(0);
+        expect(edge.length).to.equal(5);
+    });
+
+    it("should be correct for edge with inner locations", () => {
+        const nodes: SimpleNode[] = [
+            { id: 0, location: { x: 0, y: 0 } },
+            { id: 1, location: { x: 0, y: 6 } },
+        ];
+        const edges: SimpleEdge[] = [{
+            id: 0,
+            startNodeId: 0,
+            endNodeId: 1,
+            innerLocations: [{ x: 4, y: 3 }],
+        }];
+        const edge = new Graph(nodes, edges).getEdge(0);
+        expect(edge.length).to.equal(10);
+    });
+});
+
 function getSingleNode(): Graph {
     const node = { id: 0, location: { x: 0, y: 0 } };
     return new Graph([node], []);
@@ -109,7 +146,21 @@ function getSingleNode(): Graph {
 
 function getTwoNodesConnectedByEdge(): Graph {
     const nodeA = { id: 0, location: { x: 0, y: 0 } };
-    const nodeB = { id: 1, location: { x: 0, y: 1 } };
+    const nodeB = { id: 1, location: { x: 1, y: 0 } };
     const edgeAB = { id: 0, startNodeId: 0, endNodeId: 1 };
     return new Graph([nodeA, nodeB], [edgeAB]);
 };
+
+function getTriangle(): Graph {
+    const nodes: SimpleNode[] = [
+        { id: "A", location: { x: 0, y: 0 } },
+        { id: "B", location: { x: 1, y: 0 } },
+        { id: "C", location: { x: 0, y: 1 } },
+    ];
+    const edges: SimpleEdge[] = [
+        { id: "AB", startNodeId: "A", endNodeId: "B" },
+        { id: "BC", startNodeId: "B", endNodeId: "C" },
+        { id: "CA", startNodeId: "C", endNodeId: "A" },
+    ];
+    return new Graph(nodes, edges);
+}
