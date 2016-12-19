@@ -1,5 +1,5 @@
 {
-  "name": "shortest-edge",
+  "name": "graphs-and-paths",
   "version": "1.0.0",
   "description": "Find the shortest path from one point in a graph to another, including points on edges.",
   "main": "index.js",
@@ -15,7 +15,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/dphilipson/shortest-edge.git"
+    "url": "git+https://github.com/dphilipson/graphs-and-paths.git"
   },
   "keywords": [
     "dijkstra",
@@ -26,9 +26,9 @@
   "author": "David Philipson <dphilipson@gmail.com> (http://dphil.me)",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/dphilipson/shortest-edge/issues"
+    "url": "https://github.com/dphilipson/graphs-and-paths/issues"
   },
-  "homepage": "https://github.com/dphilipson/shortest-edge#readme",
+  "homepage": "https://github.com/dphilipson/graphs-and-paths#readme",
   "devDependencies": {
     "@types/chai": "^3.4.34",
     "@types/mocha": "^2.2.33",
@@ -37,5 +37,9 @@
     "ts-node": "^1.7.2",
     "tslint": "^4.1.1",
     "typescript": "^2.1.4"
+  },
+  "dependencies": {
+    "@types/es6-shim": "^0.31.32",
+    "es6-shim": "^0.35.2"
   }
 }
