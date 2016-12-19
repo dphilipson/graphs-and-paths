@@ -13,11 +13,9 @@ export function getPathLength(path: Location[]): number {
 }
 
 export function getDistanceAlongPath(path: Location[], distance: number): Location {
-    if (distance < 0) {
-        throw new Error(`Distance cannot be negative, but was ${distance}`);
-    }
+    const numPointsInPath = path.length;
     let distanceLeft = distance;
-    for (let i = 0, limit = path.length - 1; i < limit; i++) {
+    for (let i = 0; i < numPointsInPath - 1; i++) {
         const segmentStart = path[i];
         const segmentEnd = path[i + 1];
         const segmentLength = distanceBetween(segmentStart, segmentEnd);
@@ -27,22 +25,20 @@ export function getDistanceAlongPath(path: Location[], distance: number): Locati
             distanceLeft -= segmentLength;
         }
     }
-    throw new Error(`Distance ${distance} was greater than the path length`);
+    return path[numPointsInPath - 1];
 }
 
 function getIntermediateLocation(start: Location, end: Location, distance: number): Location {
-    if (distance < 0) {
-        throw new Error(`Distance cannot be negative, but was ${distance}`);
-    }
     const length = distanceBetween(start, end);
-    if (distance > length) {
-        throw new Error(`Distance ${distance} was greater than length ${length} between endpoints`);
-    }
-    const t = distance / length;
+    const t = clamp(distance / length, 0, 1);
     return {
         x: (1 - t) * start.x + t * end.x,
         y: (1 - t) * start.y + t * end.y,
     };
+}
+
+function clamp(x: number, min: number, max: number): number {
+    return Math.max(min, Math.min(max, x));
 }
 
 function distanceBetween(location1: Location, location2: Location): number {

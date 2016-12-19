@@ -93,8 +93,11 @@ export default class Graph {
 
     public getLocation(edgePoint: EdgePoint): Location {
         const { edgeId, distance } = edgePoint;
-        const { innerLocations } = this.getEdgeOrThrow(edgeId);
+        const { length, innerLocations } = this.getEdgeOrThrow(edgeId);
         const [startNode, endNode] = this.getEndpointsOfEdge(edgeId);
+        if (distance >= length) {
+            return endNode.location;
+        }
         const path = [startNode.location, ...innerLocations, endNode.location];
         return getDistanceAlongPath(path, distance);
     }

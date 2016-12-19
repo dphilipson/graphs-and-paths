@@ -190,16 +190,34 @@ describe("getLocation()", () => {
         expect(actualLocations).to.deep.equal(expectedLocations);
     });
 
+    it("should behave in double imprecision corner case", () => {
+        // Fact: 2/3 + 1/3 === 1, but 1 - 2/3 - 1/3 !== 0 in floating point arithmatic.
+        // This test checks that this does not cause trouble for us.
+        const nodes: SimpleNode[] = [
+            { id: "A", location: { x: 0, y: 0 } },
+            { id: "B", location: { x: 2 / 3, y: 1 / 3 } },
+        ];
+        const edges: SimpleEdge[] = [{
+            id: "AB",
+            startNodeId: "A",
+            endNodeId: "B",
+            innerLocations: [{ x: 2 / 3, y: 0 }],
+        }];
+        const graph = new Graph(nodes, edges);
+        const { length } = graph.getEdge("AB");
+        expect(graph.getLocation({ edgeId: "AB", distance: length })).to.deep.equal({ x: 2 / 3, y: 1 / 3 });
+    });
+
     it("should throw on nonexistent edgeId", () => {
         expect(() => TestGraphs.getTriangle().getLocation({ edgeId: "TD", distance: 0 })).to.throw(/TD/);
     });
 
-    it("should throw on negative distance", () => {
-        expect(() => TestGraphs.getTriangle().getLocation({ edgeId: "AB", distance: -1 })).to.throw(/-1/);
+    it("should return start on negative distance", () => {
+        expect(TestGraphs.getTriangle().getLocation({ edgeId: "AB", distance: -1 })).to.deep.equal({ x: 0, y: 0 });
     });
 
-    it("should throw on distance greater than edge length", () => {
-        expect(() => TestGraphs.getTriangle().getLocation({ edgeId: "AB", distance: 10 })).to.throw(/10/);
+    it("should return end on distance greater than edge length", () => {
+        expect(TestGraphs.getTriangle().getLocation({ edgeId: "AB", distance: 10 })).to.deep.equal({ x: 1, y: 0});
     });
 });
 
