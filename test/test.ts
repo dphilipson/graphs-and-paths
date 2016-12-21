@@ -217,7 +217,7 @@ describe("getLocation()", () => {
     });
 
     it("should return end on distance greater than edge length", () => {
-        expect(TestGraphs.getTriangle().getLocation({ edgeId: "AB", distance: 10 })).to.deep.equal({ x: 1, y: 0});
+        expect(TestGraphs.getTriangle().getLocation({ edgeId: "AB", distance: 10 })).to.deep.equal({ x: 1, y: 0 });
     });
 });
 
@@ -245,5 +245,72 @@ describe("lengths", () => {
         }];
         const edge = new Graph(nodes, edges).getEdge(0);
         expect(edge.length).to.equal(10);
+    });
+});
+
+describe("coalesced()", () => {
+    it("should return identical graph if nothing to coalesce", () => {
+        const graph = TestGraphs.getTriangle();
+        const coalesced = graph.coalesced();
+        expect(coalesced.getAllNodes()).to.deep.equal(graph.getAllNodes());
+        expect(coalesced.getAllEdges()).to.deep.equal(graph.getAllEdges());
+    });
+
+    it("should coalesce segmented curve into single curve", () => {
+        const nodes: SimpleNode[] = [
+            { id: "A", location: { x: 0, y: 0 } },
+            { id: "B", location: { x: 1, y: 0 } },
+            { id: "C", location: { x: 1, y: 1 } },
+            { id: "D", location: { x: 2, y: 1 } },
+        ];
+        const edges: SimpleEdge[] = [
+            { id: "AB", startNodeId: "A", endNodeId: "B" },
+            { id: "BC", startNodeId: "B", endNodeId: "C" },
+            { id: "CD", startNodeId: "C", endNodeId: "D" },
+        ];
+        const expectedNodes: SimpleNode[] = [
+            { id: "A", location: { x: 0, y: 0 } },
+            { id: "D", location: { x: 2, y: 1 } },
+        ];
+        const expectedEdges: SimpleEdge[] = [
+            { id: "AB", startNodeId: "A", endNodeId: "D" },
+        ];
+        const graph = new Graph(nodes, edges).coalesced();
+        expect(graph.getAllNodes()).to.deep.equal(expectedNodes);
+        expect(graph.getAllEdges()).to.deep.equal(expectedEdges);
+    });
+
+    it("should coalesce segmented arms of three-armed star", () => {
+        const nodes: SimpleNode[] = [
+            { id: "center", location: { x: 0, y: 0 } },
+            { id: "rightArmJoint", location: { x: 1, y: 0 } },
+            { id: "rightArmEnd", location: { x: 2, y: 0 } },
+            { id: "topArmJoint", location: { x: 0, y: 1 } },
+            { id: "topArmEnd", location: { x: 0, y: 2 } },
+            { id: "leftArmJoint", location: { x: -1, y: 0 } },
+            { id: "leftArmEnd", location: { x: -2, y: 0 } },
+        ];
+        const edges: SimpleEdge[] = [
+            { id: "rightArm1", startNodeId: "center", endNodeId: "rightArmJoint" },
+            { id: "rightArm2", startNodeId: "rightArmJoint", endNodeId: "rightArmEnd" },
+            { id: "topArm1", startNodeId: "center", endNodeId: "topArmJoint" },
+            { id: "topArm2", startNodeId: "topArmJoint", endNodeId: "topArmEnd" },
+            { id: "leftArm1", startNodeId: "center", endNodeId: "leftArmJoint" },
+            { id: "leftArm2", startNodeId: "leftArmJoint", endNodeId: "leftArmEnd" },
+        ];
+        const expectedNodes: SimpleNode[] = [
+            { id: "center", location: { x: 0, y: 0 } },
+            { id: "rightArmEnd", location: { x: 2, y: 0 } },
+            { id: "topArmEnd", location: { x: 0, y: 2 } },
+            { id: "leftArmEnd", location: { x: -2, y: 0 } },
+        ];
+        const expectedEdges: SimpleEdge[] = [
+            { id: "rightArm1", startNodeId: "center", endNodeId: "rightArmEnd" },
+            { id: "topArm1", startNodeId: "center", endNodeId: "topArmEnd" },
+            { id: "leftArm1", startNodeId: "center", endNodeId: "leftArmEnd" },
+        ];
+        const graph = new Graph(nodes, edges).coalesced();
+        expect(graph.getAllNodes()).to.deep.equal(expectedNodes);
+        expect(graph.getAllEdges()).to.deep.equal(expectedEdges);
     });
 });

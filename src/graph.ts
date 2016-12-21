@@ -102,6 +102,10 @@ export default class Graph {
         return getDistanceAlongPath(path, distance);
     }
 
+    public coalesced(): Graph {
+        return this;
+    }
+
     private getNodeOrThrow(nodeId: NodeId): Node {
         const node = this.nodesById.get(nodeId);
         if (!node) {
