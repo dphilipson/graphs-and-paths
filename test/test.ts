@@ -9,7 +9,7 @@ describe("constructor", () => {
             { id: 0, location: { x: 0, y: 0 } },
             { id: 0, location: { x: 0, y: 1 } },
         ];
-        expect(() => new Graph(nodes, [])).to.throw(/0/);
+        expect(() => Graph.create(nodes, [])).to.throw(/0/);
     });
 
     it("should fail if edge ID is repeated", () => {
@@ -22,7 +22,7 @@ describe("constructor", () => {
             { id: 0, startNodeId: 0, endNodeId: 1 },
             { id: 0, startNodeId: 1, endNodeId: 2 },
         ];
-        expect(() => new Graph(nodes, edges)).to.throw(/0/);
+        expect(() => Graph.create(nodes, edges)).to.throw(/0/);
     });
 
     it("should fail if edge references nonexistent node", () => {
@@ -31,13 +31,13 @@ describe("constructor", () => {
             { id: 1, location: { x: 0, y: 1 } },
         ];
         const edges: SimpleEdge[] = [{ id: 0, startNodeId: 0, endNodeId: 2 }];
-        expect(() => new Graph(nodes, edges)).to.throw(/2/);
+        expect(() => Graph.create(nodes, edges)).to.throw(/2/);
     });
 });
 
 describe("getAllNodes()", () => {
     it("should return nothing on an empty graph", () => {
-        const graph = new Graph([], []);
+        const graph = Graph.create([], []);
         expect(graph.getAllNodes()).to.be.empty;
     });
 
@@ -72,7 +72,7 @@ describe("getNode()", () => {
 
 describe("getAllEdges()", () => {
     it("should return nothing on an empty graph", () => {
-        const graph = new Graph([], []);
+        const graph = Graph.create([], []);
         expect(graph.getAllEdges()).to.be.empty;
     });
 
@@ -155,7 +155,7 @@ describe("getLocation()", () => {
             { id: "B", location: { x: 40, y: 50 } },
         ];
         const edges: SimpleEdge[] = [{ id: "AB", startNodeId: "A", endNodeId: "B" }];
-        const graph = new Graph(nodes, edges);
+        const graph = Graph.create(nodes, edges);
         const distances = [0, 10, 50];
         const expectedLocations: Location[] = [
             { x: 10, y: 10 },
@@ -178,7 +178,7 @@ describe("getLocation()", () => {
             endNodeId: "B",
             innerLocations: [{ x: 1, y: 0 }, { x: 1, y: 1 }, { x: 2, y: 1 }],
         }];
-        const graph = new Graph(nodes, edges);
+        const graph = Graph.create(nodes, edges);
         const distances = [0, 1, 2.5, 4];
         const expectedLocations: Location[] = [
             { x: 0, y: 0 },
@@ -203,7 +203,7 @@ describe("getLocation()", () => {
             endNodeId: "B",
             innerLocations: [{ x: 2 / 3, y: 0 }],
         }];
-        const graph = new Graph(nodes, edges);
+        const graph = Graph.create(nodes, edges);
         const { length } = graph.getEdge("AB");
         expect(graph.getLocation({ edgeId: "AB", distance: length })).to.deep.equal({ x: 2 / 3, y: 1 / 3 });
     });
@@ -228,7 +228,7 @@ describe("lengths", () => {
             { id: 1, location: { x: 4, y: -3 } },
         ];
         const edges: SimpleEdge[] = [{ id: 0, startNodeId: 0, endNodeId: 1 }];
-        const edge = new Graph(nodes, edges).getEdge(0);
+        const edge = Graph.create(nodes, edges).getEdge(0);
         expect(edge.length).to.equal(5);
     });
 
@@ -243,14 +243,14 @@ describe("lengths", () => {
             endNodeId: 1,
             innerLocations: [{ x: 4, y: 3 }],
         }];
-        const edge = new Graph(nodes, edges).getEdge(0);
+        const edge = Graph.create(nodes, edges).getEdge(0);
         expect(edge.length).to.equal(10);
     });
 });
 
 describe("coalesced()", () => {
     it("should return identical graph if nothing to coalesce", () => {
-        const graph = TestGraphs.getTriangle();
+        const graph = TestGraphs.getTwoNodes();
         const coalesced = graph.coalesced();
         expect(coalesced.getAllNodes()).to.deep.equal(graph.getAllNodes());
         expect(coalesced.getAllEdges()).to.deep.equal(graph.getAllEdges());
@@ -273,11 +273,17 @@ describe("coalesced()", () => {
             { id: "D", location: { x: 2, y: 1 } },
         ];
         const expectedEdges: SimpleEdge[] = [
-            { id: "AB", startNodeId: "A", endNodeId: "D" },
+            {
+                id: "AB",
+                startNodeId: "A",
+                endNodeId: "D",
+                innerLocations: [{ x: 1, y: 0 }, { x: 1, y: 1 }],
+            },
         ];
-        const graph = new Graph(nodes, edges).coalesced();
-        expect(graph.getAllNodes()).to.deep.equal(expectedNodes);
-        expect(graph.getAllEdges()).to.deep.equal(expectedEdges);
+        const graph = Graph.create(nodes, edges).coalesced();
+        const expectedGraph = Graph.create(expectedNodes, expectedEdges);
+        expect(graph.getAllNodes()).to.deep.equal(expectedGraph.getAllNodes());
+        expect(graph.getAllEdges()).to.deep.equal(expectedGraph.getAllEdges());
     });
 
     it("should coalesce segmented arms of three-armed star", () => {
@@ -305,12 +311,28 @@ describe("coalesced()", () => {
             { id: "leftArmEnd", location: { x: -2, y: 0 } },
         ];
         const expectedEdges: SimpleEdge[] = [
-            { id: "rightArm1", startNodeId: "center", endNodeId: "rightArmEnd" },
-            { id: "topArm1", startNodeId: "center", endNodeId: "topArmEnd" },
-            { id: "leftArm1", startNodeId: "center", endNodeId: "leftArmEnd" },
+            {
+                id: "rightArm1",
+                startNodeId: "center",
+                endNodeId: "rightArmEnd",
+                innerLocations: [{ x: 1, y: 0 }],
+            },
+            {
+                id: "topArm1",
+                startNodeId: "center",
+                endNodeId: "topArmEnd",
+                innerLocations: [{ x: 0, y: 1 }],
+            },
+            {
+                id: "leftArm1",
+                startNodeId: "center",
+                endNodeId: "leftArmEnd",
+                innerLocations: [{ x: -1, y: 0 }],
+            },
         ];
-        const graph = new Graph(nodes, edges).coalesced();
-        expect(graph.getAllNodes()).to.deep.equal(expectedNodes);
-        expect(graph.getAllEdges()).to.deep.equal(expectedEdges);
+        const graph = Graph.create(nodes, edges).coalesced();
+        const expectedGraph = Graph.create(expectedNodes, expectedEdges);
+        expect(graph.getAllNodes()).to.deep.equal(expectedGraph.getAllNodes());
+        expect(graph.getAllEdges()).to.deep.equal(expectedGraph.getAllEdges());
     });
 });

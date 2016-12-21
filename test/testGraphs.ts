@@ -3,14 +3,14 @@ import { SimpleEdge, SimpleNode } from "../src/types";
 
 export function getSingleNode(): Graph {
     const node = { id: 0, location: { x: 0, y: 0 } };
-    return new Graph([node], []);
+    return Graph.create([node], []);
 }
 
 export function getTwoNodes(): Graph {
     const nodeA = { id: "A", location: { x: 0, y: 0 } };
     const nodeB = { id: "B", location: { x: 1, y: 0 } };
     const edgeAB = { id: "AB", startNodeId: "A", endNodeId: "B" };
-    return new Graph([nodeA, nodeB], [edgeAB]);
+    return Graph.create([nodeA, nodeB], [edgeAB]);
 };
 
 export function getTriangle(): Graph {
@@ -24,5 +24,5 @@ export function getTriangle(): Graph {
         { id: "BC", startNodeId: "B", endNodeId: "C" },
         { id: "CA", startNodeId: "C", endNodeId: "A" },
     ];
-    return new Graph(nodes, edges);
+    return Graph.create(nodes, edges);
 }

@@ -1,4 +1,4 @@
-import { Location } from "./types";
+import { Edge, Location, SimpleEdge } from "./types";
 
 export function getPathLength(path: Location[]): number {
     if (path.length === 0) {
@@ -12,7 +12,7 @@ export function getPathLength(path: Location[]): number {
     }
 }
 
-export function getDistanceAlongPath(path: Location[], distance: number): Location {
+export function getLocationAlongPath(path: Location[], distance: number): Location {
     const numPointsInPath = path.length;
     let distanceLeft = distance;
     for (let i = 0; i < numPointsInPath - 1; i++) {
@@ -45,6 +45,23 @@ function distanceBetween(location1: Location, location2: Location): number {
     const dx = location2.x - location1.x;
     const dy = location2.y - location1.y;
     return Math.sqrt(dx * dx + dy * dy);
+}
+
+export function compareIds(id1: number | string, id2: number | string) {
+    // Numbers before strings, then natural order.
+    if (typeof id1 === typeof id2) {
+        if (id1 < id2) {
+            return -1;
+        } else if (id1 === id2) {
+            return 0;
+        } else {
+            return 1;
+        }
+    } else if (typeof id1 === "number") {
+        return -1;
+    } else {
+        return 1;
+    }
 }
 
 export function unimplemented(): never {

@@ -1,4 +1,4 @@
-import { getDistanceAlongPath, getPathLength, unimplemented } from "./math";
+import { compareIds, getLocationAlongPath, getPathLength, unimplemented } from "./math";
 import {
     Edge,
     EdgeId,
@@ -11,10 +11,7 @@ import {
 } from "./types";
 
 export default class Graph {
-    private readonly nodesById: Map<NodeId, Node>;
-    private readonly edgesById: Map<EdgeId, Edge>;
-
-    public constructor(nodes: SimpleNode[], edges: SimpleEdge[]) {
+    public static create(nodes: SimpleNode[], edges: SimpleEdge[]): Graph {
         const nodesById = new Map<NodeId, Node>();
         const edgesById = new Map<EdgeId, Edge>();
         nodes.forEach((node) => {
@@ -46,9 +43,13 @@ export default class Graph {
             end.edgeIds.push(id);
             edgesById.set(id, { id, startNodeId, endNodeId, length, innerLocations });
         });
-        this.nodesById = nodesById;
-        this.edgesById = edgesById;
+        return new Graph(nodesById, edgesById);
     }
+
+    private constructor(
+        private readonly nodesById: Map<NodeId, Node>,
+        private readonly edgesById: Map<EdgeId, Edge>,
+    ) { }
 
     public getAllNodes(): Node[] {
         return Array.from(this.nodesById.values());
@@ -99,11 +100,69 @@ export default class Graph {
             return endNode.location;
         }
         const path = [startNode.location, ...innerLocations, endNode.location];
-        return getDistanceAlongPath(path, distance);
+        return getLocationAlongPath(path, distance);
     }
 
     public coalesced(): Graph {
-        return this;
+        const nodes = this.getAllNodes();
+        const newNodes = new Set(this.nodesById.values());
+        const newEdges = new Set<SimpleEdge>(this.edgesById.values());
+        const clearIntermediateNode = (node: Node) => {
+            newNodes.delete(node);
+            newEdges.delete(this.getEdge(node.edgeIds[0]));
+            newEdges.delete(this.getEdge(node.edgeIds[1]));
+        };
+        newNodes.forEach((node) => {
+            if (node.edgeIds.length === 2) {
+                // It is permitted to delete elements of a Map while iterating over it.
+                clearIntermediateNode(node);
+                let minEdgeId = node.edgeIds[0];
+                const refineMinEdgeId = (edgeId: EdgeId) => {
+                    if (compareIds(edgeId, minEdgeId) < 0) {
+                        minEdgeId = edgeId;
+                    }
+                };
+                const followDownPath = (firstNode: Node) => {
+                    let currentNode = firstNode;
+                    let lastNode = node;
+                    const nodesAlongPath = [currentNode];
+                    while (currentNode.edgeIds.length === 2) {
+                        const [edgeId1, edgeId2] = currentNode.edgeIds;
+                        refineMinEdgeId(edgeId1);
+                        refineMinEdgeId(edgeId2);
+                        clearIntermediateNode(currentNode);
+                        const edge1Endpoint = this.getOtherEndpoint(edgeId1, currentNode.id);
+                        const nextNode = edge1Endpoint === lastNode
+                            ? this.getOtherEndpoint(edgeId2, currentNode.id)
+                            : edge1Endpoint;
+                        nodesAlongPath.push(nextNode);
+                        lastNode = currentNode;
+                        currentNode = nextNode;
+                    }
+                    return nodesAlongPath;
+                };
+                const path1 = followDownPath(this.getOtherEndpoint(node.edgeIds[0], node.id));
+                const path2 = followDownPath(this.getOtherEndpoint(node.edgeIds[1], node.id));
+                const isPath1First = compareIds(path1[path1.length - 1].id, path2[path2.length - 1].id) < 0;
+                const startPath = isPath1First ? path1 : path2;
+                const endPath = isPath1First ? path2 : path1;
+                const startNodeId = startPath[startPath.length - 1].id;
+                const endNodeId = endPath[endPath.length - 1].id;
+                const innerLocations = [
+                    ...startPath.reverse().slice(1),
+                    node,
+                    ...endPath.slice(0, endPath.length - 1),
+                ].map((n) => n.location);
+                const coalescedEdge: SimpleEdge = {
+                    id: minEdgeId,
+                    startNodeId,
+                    endNodeId,
+                    innerLocations,
+                };
+                newEdges.add(coalescedEdge);
+            }
+        });
+        return Graph.create(Array.from(newNodes), Array.from(newEdges));
     }
 
     private getNodeOrThrow(nodeId: NodeId): Node {
