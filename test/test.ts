@@ -335,4 +335,46 @@ describe("coalesced()", () => {
         expect(graph.getAllNodes()).to.deep.equal(expectedGraph.getAllNodes());
         expect(graph.getAllEdges()).to.deep.equal(expectedGraph.getAllEdges());
     });
+
+    it("should preserve inner locations in correct order", () => {
+        const nodes: SimpleNode[] = [
+            { id: "A", location: { x: 0, y: 0 } },
+            { id: "B", location: { x: 3, y: 0 } },
+            { id: "C", location: { x: 3, y: 3 } },
+        ];
+        const edges: SimpleEdge[] = [
+            {
+                id: "AB",
+                startNodeId: "A",
+                endNodeId: "B",
+                innerLocations: [{ x: 1, y: 0 }, { x: 2, y: 0 }],
+            },
+            {
+                id: "CB",
+                startNodeId: "C",
+                endNodeId: "B",
+                innerLocations: [{ x: 3, y: 2 }, { x: 3, y: 1 }],
+            },
+        ];
+        const expectedNodes: SimpleNode[] = [
+            { id: "A", location: { x: 0, y: 0 } },
+            { id: "C", location: { x: 3, y: 3 } },
+        ];
+        const expectedEdges: SimpleEdge[] = [{
+            id: "AB",
+            startNodeId: "A",
+            endNodeId: "C",
+            innerLocations: [
+                { x: 1, y: 0 },
+                { x: 2, y: 0 },
+                { x: 3, y: 0 },
+                { x: 3, y: 1 },
+                { x: 3, y: 2 },
+            ],
+        }];
+        const graph = Graph.create(nodes, edges).coalesced();
+        const expectedGraph = Graph.create(expectedNodes, expectedEdges);
+        expect(graph.getAllNodes()).to.deep.equal(expectedGraph.getAllNodes());
+        expect(graph.getAllEdges()).to.deep.equal(expectedGraph.getAllEdges());
+    });
 });
