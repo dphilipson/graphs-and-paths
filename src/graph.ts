@@ -1,4 +1,3 @@
-import { compareIds, getLocationAlongPath, getPathLength, unimplemented } from "./math";
 import {
     Edge,
     EdgeId,
@@ -6,9 +5,19 @@ import {
     Location,
     Node,
     NodeId,
+    OrientedEdge,
     SimpleEdge,
     SimpleNode,
 } from "./types";
+import {
+    compareIds,
+    flatMap,
+    getLocationAlongPath,
+    getPathLength,
+    min,
+    reversePath,
+    unimplemented,
+} from "./utils";
 
 export default class Graph {
     public static create(nodes: SimpleNode[], edges: SimpleEdge[]): Graph {
@@ -104,65 +113,49 @@ export default class Graph {
     }
 
     public coalesced(): Graph {
-        const nodes = this.getAllNodes();
-        const newNodes = new Set(this.nodesById.values());
-        const newEdges = new Set<SimpleEdge>(this.edgesById.values());
-        const clearIntermediateNode = (node: Node) => {
-            newNodes.delete(node);
-            newEdges.delete(this.getEdge(node.edgeIds[0]));
-            newEdges.delete(this.getEdge(node.edgeIds[1]));
-        };
-        newNodes.forEach((node) => {
-            if (node.edgeIds.length === 2) {
-                // It is permitted to delete elements of a Map while iterating over it.
-                clearIntermediateNode(node);
-                let minEdgeId = node.edgeIds[0];
-                const refineMinEdgeId = (edgeId: EdgeId) => {
-                    if (compareIds(edgeId, minEdgeId) < 0) {
-                        minEdgeId = edgeId;
-                    }
-                };
-                const followDownPath = (firstNode: Node) => {
-                    let currentNode = firstNode;
-                    let lastNode = node;
-                    const nodesAlongPath = [currentNode];
-                    while (currentNode.edgeIds.length === 2) {
-                        const [edgeId1, edgeId2] = currentNode.edgeIds;
-                        refineMinEdgeId(edgeId1);
-                        refineMinEdgeId(edgeId2);
-                        clearIntermediateNode(currentNode);
-                        const edge1Endpoint = this.getOtherEndpoint(edgeId1, currentNode.id);
-                        const nextNode = edge1Endpoint === lastNode
-                            ? this.getOtherEndpoint(edgeId2, currentNode.id)
-                            : edge1Endpoint;
-                        nodesAlongPath.push(nextNode);
-                        lastNode = currentNode;
-                        currentNode = nextNode;
-                    }
-                    return nodesAlongPath;
-                };
-                const path1 = followDownPath(this.getOtherEndpoint(node.edgeIds[0], node.id));
-                const path2 = followDownPath(this.getOtherEndpoint(node.edgeIds[1], node.id));
-                const isPath1First = compareIds(path1[path1.length - 1].id, path2[path2.length - 1].id) < 0;
-                const startPath = isPath1First ? path1 : path2;
-                const endPath = isPath1First ? path2 : path1;
-                const startNodeId = startPath[startPath.length - 1].id;
-                const endNodeId = endPath[endPath.length - 1].id;
-                const innerLocations = [
-                    ...startPath.reverse().slice(1),
-                    node,
-                    ...endPath.slice(0, endPath.length - 1),
-                ].map((n) => n.location);
-                const coalescedEdge: SimpleEdge = {
+        const remainingEdges = new Set(this.edgesById.values());
+        const newNodesById = new Map(this.nodesById.entries());
+        const newEdges: SimpleEdge[] = [];
+        remainingEdges.forEach((edge) => {
+            const forwardPath = this.getOnlyPath({ edge, isForward: true });
+            const backwardsPath = this.getOnlyPath({ edge, isForward: false });
+            const fullPath = [...reversePath(backwardsPath.slice(1)), ...forwardPath];
+            if (fullPath.length === 1) {
+                newEdges.push(edge);
+            } else {
+                const firstEdge = fullPath[0];
+                const lastEdge = fullPath[fullPath.length - 1];
+                const startNodeId = firstEdge.isForward ? firstEdge.edge.startNodeId : firstEdge.edge.endNodeId;
+                const endNodeId = lastEdge.isForward ? lastEdge.edge.endNodeId : lastEdge.edge.startNodeId;
+                const minEdgeId = min(fullPath.map((orientedEdge) => orientedEdge.edge.id), compareIds);
+                const innerLocations = flatMap(fullPath, (pathEdge) => {
+                    // Take the start node and inner locations from each edge,
+                    // then slice off the first node after concatenating.
+                    const {
+                        edge: { startNodeId, endNodeId, innerLocations },
+                        isForward,
+                    } = pathEdge;
+                    const firstNodeId = isForward ? startNodeId : endNodeId;
+                    const orientedInnerLocations = isForward ? innerLocations : innerLocations.slice().reverse();
+                    return [this.getNode(firstNodeId).location, ...orientedInnerLocations];
+                }).slice(1);
+                const newEdge: SimpleEdge = {
                     id: minEdgeId,
                     startNodeId,
                     endNodeId,
                     innerLocations,
                 };
-                newEdges.add(coalescedEdge);
+                const nodeIdsToDelete = flatMap(fullPath, (orientedEdge) => {
+                    const { startNodeId, endNodeId } = orientedEdge.edge;
+                    return [startNodeId, endNodeId];
+                }).filter((nodeId) => nodeId !== startNodeId && nodeId !== endNodeId);
+                const edgesSeen = fullPath.map((pathEdge) => pathEdge.edge);
+                nodeIdsToDelete.forEach((nodeId) => newNodesById.delete(nodeId));
+                edgesSeen.forEach((seenEdge) => remainingEdges.delete(seenEdge));
+                newEdges.push(newEdge);
             }
         });
-        return Graph.create(Array.from(newNodes), Array.from(newEdges));
+        return Graph.create(Array.from(newNodesById.values()), newEdges);
     }
 
     private getNodeOrThrow(nodeId: NodeId): Node {
@@ -179,5 +172,38 @@ export default class Graph {
             throw new Error(`Edge ID ${edgeId} does not exist`);
         }
         return edge;
+    }
+
+    /**
+     * Starting from a given edge and direction, follows along consecutive
+     * edges as long as there is only one way to do so, i.e. until reaching a
+     * fork. Returns an array of the oriented edges seen, including the start
+     * edge.
+     * 
+     * If the edge is part of an isolated loop (so no fork is found), then the
+     * last element of the returned array will be the same as the first one.
+     */
+    private getOnlyPath(startEdge: OrientedEdge): OrientedEdge[] {
+        const path: OrientedEdge[] = [];
+        let currentEdge = startEdge;
+        while (true) {
+            path.push(currentEdge);
+            const nextNodeId =
+                currentEdge.isForward ? currentEdge.edge.endNodeId : currentEdge.edge.startNodeId;
+            const nextNode = this.getNode(nextNodeId);
+            if (nextNode.edgeIds.length !== 2) {
+                return path;
+            } else {
+                const [edgeId1, edgeId2] = nextNode.edgeIds;
+                const nextEdgeId = currentEdge.edge.id === edgeId1 ? edgeId2 : edgeId1;
+                if (nextEdgeId === startEdge.edge.id) {
+                    path.push(startEdge);
+                    return path;
+                }
+                const nextEdge = this.getEdge(nextEdgeId);
+                const isForward = nextEdge.startNodeId === nextNodeId;
+                currentEdge = { edge: nextEdge, isForward };
+            }
+        }
     }
 }

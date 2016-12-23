@@ -31,3 +31,8 @@ export interface EdgePoint {
     edgeId: EdgeId;
     distance: number;
 }
+
+export interface OrientedEdge {
+    edge: Edge;
+    isForward: boolean;
+}

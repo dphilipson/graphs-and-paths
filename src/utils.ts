@@ -1,4 +1,4 @@
-import { Edge, Location, SimpleEdge } from "./types";
+import { Edge, Location, OrientedEdge, SimpleEdge } from "./types";
 
 export function getPathLength(path: Location[]): number {
     if (path.length === 0) {
@@ -62,6 +62,23 @@ export function compareIds(id1: number | string, id2: number | string) {
     } else {
         return 1;
     }
+}
+
+export function reversePath(edges: OrientedEdge[]): OrientedEdge[] {
+    return edges
+        .map(({edge, isForward}) => ({edge, isForward: !isForward}))
+        .reverse();
+}
+
+export function flatMap<T, U>(array: T[], f: (t: T) => U[]): U[] {
+    return Array.prototype.concat.apply([], array.map(f));
+}
+
+export function min<T>(array: T[], comparator: (t1: T, t2: T) => number): T {
+    if (array.length === 0) {
+        throw new Error("Cannot take minimum of empty array");
+    }
+    return array.reduce((a, b) => comparator(a, b) < 0 ? a : b);
 }
 
 export function unimplemented(): never {
