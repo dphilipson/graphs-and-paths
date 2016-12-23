@@ -574,6 +574,50 @@ describe("getShortestPath()", () => {
     });
 });
 
+describe("advancePath()", () => {
+    const graph = TestGraphs.getFourNodes();
+    const path: Path = {
+        start: { edgeId: "AB", distance: 0.5 },
+        end: { edgeId: "CD", distance: 0.5 },
+        orientedEdges: [
+            { edge: graph.getEdge("AB"), isForward: true },
+            { edge: graph.getEdge("BC"), isForward: true },
+            { edge: graph.getEdge("CD"), isForward: true },
+        ],
+        nodes: [graph.getNode("B"), graph.getNode("C")],
+        length: 2,
+    };
+
+    it("should return the same path if distance is zero", () => {
+        const advanced = graph.advancePath(path, 0);
+        expect(advanced).to.deep.equal(path);
+    });
+
+    it("should advance path, dropping nodes and edges", () => {
+        const advanced = graph.advancePath(path, 1.75);
+        const expected: Path = {
+            start: { edgeId: "CD", distance: 0.25 },
+            end: { edgeId: "CD", distance: 0.5 },
+            orientedEdges: [{ edge: graph.getEdge("CD"), isForward: true}],
+            nodes: [],
+            length: 0.25,
+        };
+        expect(advanced).to.deep.equal(expected);
+    });
+
+    it("should return a single-point path if distance is greater than length", () => {
+        const advanced = graph.advancePath(path, 3);
+        const expected: Path = {
+            start: { edgeId: "CD", distance: 0.5 },
+            end: { edgeId: "CD", distance: 0.5 },
+            orientedEdges: [{ edge: graph.getEdge("CD"), isForward: true}],
+            nodes: [],
+            length: 0,
+        };
+        expect(advanced).to.deep.equal(expected);
+    });
+});
+
 function expectGraphsToBeEqual(actual: Graph, expected: Graph): void {
     expect(actual.getAllNodes()).to.deep.equal(expected.getAllNodes());
     expect(actual.getAllEdges()).to.deep.equal(expected.getAllEdges());

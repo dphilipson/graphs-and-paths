@@ -258,6 +258,51 @@ export default class Graph {
         throw new Error(`No path from starting edge ${start.edgeId} to ending edge ${end.edgeId}`);
     }
 
+    /**
+     * Returns a new path obtained by truncating the given path by the provided distance. That is,
+     * the start point of the path moves forward, and any nodes and edges that it passes are
+     * dropped.
+     */
+    public advancePath(path: Path, distance: number): Path {
+        const { start, end, orientedEdges, nodes, length } = path;
+        if (distance === 0) {
+            return path;
+        } else if (distance >= path.length) {
+            return {
+                start: end,
+                end,
+                orientedEdges: [orientedEdges[orientedEdges.length - 1]],
+                nodes: [],
+                length: 0,
+            };
+        } else {
+            const {
+                edge: startEdge,
+                isForward: isStartEdgeForward,
+            } = orientedEdges[0];
+            const orientedStartDistance = isStartEdgeForward
+                ? start.distance
+                : startEdge.length - start.distance;
+            let distanceRemaining = distance + orientedStartDistance;
+            let edgeIndex = 0;
+            while (distanceRemaining > orientedEdges[edgeIndex].edge.length) {
+                distanceRemaining -= orientedEdges[edgeIndex].edge.length;
+                edgeIndex++;
+            }
+            const newStartEdge = orientedEdges[edgeIndex];
+            const distanceDownEdge = newStartEdge.isForward
+                ? distanceRemaining
+                : newStartEdge.edge.length - distanceRemaining;
+            return {
+                start: { edgeId: newStartEdge.edge.id, distance: distanceDownEdge },
+                end,
+                orientedEdges: orientedEdges.slice(edgeIndex),
+                nodes: nodes.slice(edgeIndex),
+                length: length - distance,
+            };
+        }
+    }
+
     private getNodeOrThrow(nodeId: NodeId): Node {
         const node = this.nodesById.get(nodeId);
         if (!node) {
