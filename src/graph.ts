@@ -156,6 +156,10 @@ export default class Graph {
         return Graph.create(Array.from(newNodesById.values()), newEdges);
     }
 
+    public getConnectedComponents(): Graph[] {
+        return [this];
+    }
+
     private getNodeOrThrow(nodeId: NodeId): Node {
         const node = this.nodesById.get(nodeId);
         if (!node) {

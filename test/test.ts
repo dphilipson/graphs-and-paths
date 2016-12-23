@@ -252,8 +252,7 @@ describe("coalesced()", () => {
     it("should return identical graph if nothing to coalesce", () => {
         const graph = TestGraphs.getTwoNodes();
         const coalesced = graph.coalesced();
-        expect(coalesced.getAllNodes()).to.deep.equal(graph.getAllNodes());
-        expect(coalesced.getAllEdges()).to.deep.equal(graph.getAllEdges());
+        expectGraphsToBeEqual(coalesced, graph);
     });
 
     it("should coalesce segmented curve into single curve", () => {
@@ -282,8 +281,7 @@ describe("coalesced()", () => {
         ];
         const graph = Graph.create(nodes, edges).coalesced();
         const expectedGraph = Graph.create(expectedNodes, expectedEdges);
-        expect(graph.getAllNodes()).to.deep.equal(expectedGraph.getAllNodes());
-        expect(graph.getAllEdges()).to.deep.equal(expectedGraph.getAllEdges());
+        expectGraphsToBeEqual(graph, expectedGraph);
     });
 
     it("should coalesce segmented arms of three-armed star", () => {
@@ -332,8 +330,7 @@ describe("coalesced()", () => {
         ];
         const graph = Graph.create(nodes, edges).coalesced();
         const expectedGraph = Graph.create(expectedNodes, expectedEdges);
-        expect(graph.getAllNodes()).to.deep.equal(expectedGraph.getAllNodes());
-        expect(graph.getAllEdges()).to.deep.equal(expectedGraph.getAllEdges());
+        expectGraphsToBeEqual(graph, expectedGraph);
     });
 
     it("should preserve inner locations in correct order", () => {
@@ -374,8 +371,7 @@ describe("coalesced()", () => {
         }];
         const graph = Graph.create(nodes, edges).coalesced();
         const expectedGraph = Graph.create(expectedNodes, expectedEdges);
-        expect(graph.getAllNodes()).to.deep.equal(expectedGraph.getAllNodes());
-        expect(graph.getAllEdges()).to.deep.equal(expectedGraph.getAllEdges());
+        expectGraphsToBeEqual(graph, expectedGraph);
     });
 
     it("should handle an isolated cycle", () => {
@@ -388,7 +384,42 @@ describe("coalesced()", () => {
         }];
         const graph = TestGraphs.getTriangle().coalesced();
         const expectedGraph = Graph.create(expectedNodes, expectedEdges);
-        expect(graph.getAllNodes()).to.deep.equal(expectedGraph.getAllNodes());
-        expect(graph.getAllEdges()).to.deep.equal(expectedGraph.getAllEdges());
+        expectGraphsToBeEqual(graph, expectedGraph);
     });
 });
+
+describe("getConnectedComponents()", () => {
+    it("should return the original graph if connected", () => {
+        const graph = TestGraphs.getTriangle();
+        const components = graph.getConnectedComponents();
+        expect(components).to.have.lengthOf(1);
+        expectGraphsToBeEqual(components[0], graph);
+    });
+
+    it("should return multiple components if not connected", () => {
+        const nodeA = { id: "A", location: { x: 0, y: 0 } };
+        const nodeB = { id: "B", location: { x: 1, y: 0 } };
+        const nodeO = { id: "O", location: { x: 0, y: 1 } };
+        const nodeX = { id: "X", location: { x: 2, y: 0 } };
+        const nodeY = { id: "Y", location: { x: 2, y: 1 } };
+
+        const edgeAB = { id: "AB", startNodeId: "A", endNodeId: "B" };
+        const edgeXY = { id: "XY", startNodeId: "X", endNodeId: "Y" };
+
+        const nodes: SimpleNode[] = [nodeA, nodeB, nodeO, nodeX, nodeY];
+        const edges: SimpleEdge[] = [edgeAB, edgeXY];
+        const expectedNodes: SimpleNode[][] = [[nodeA, nodeB], [nodeO], [nodeX, nodeY]];
+        const expectedEdges: SimpleEdge[][] = [[edgeAB], [], [edgeXY]];
+        const components = Graph.create(nodes, edges).getConnectedComponents();
+        expect(components).to.have.length(3);
+        for (let i = 0; i < 3; i++) {
+            const expectedComponent = Graph.create(expectedNodes[i], expectedEdges[i]);
+            expectGraphsToBeEqual(components[i], expectedComponent);
+        }
+    });
+});
+
+function expectGraphsToBeEqual(actual: Graph, expected: Graph): void {
+    expect(actual.getAllNodes()).to.deep.equal(expected.getAllNodes());
+    expect(actual.getAllEdges()).to.deep.equal(expected.getAllEdges());
+}
