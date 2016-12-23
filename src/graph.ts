@@ -117,18 +117,16 @@ export default class Graph {
         const newNodesById = new Map(this.nodesById.entries());
         const newEdges: SimpleEdge[] = [];
         remainingEdges.forEach((edge) => {
-            const forwardPath = this.getOnlyPath({ edge, isForward: true });
-            const backwardsPath = this.getOnlyPath({ edge, isForward: false });
-            const fullPath = [...reversePath(backwardsPath.slice(1)), ...forwardPath];
-            if (fullPath.length === 1) {
+            const path = this.getOnlyPath(edge);
+            if (path.length === 1) {
                 newEdges.push(edge);
             } else {
-                const firstEdge = fullPath[0];
-                const lastEdge = fullPath[fullPath.length - 1];
+                const firstEdge = path[0];
+                const lastEdge = path[path.length - 1];
                 const startNodeId = firstEdge.isForward ? firstEdge.edge.startNodeId : firstEdge.edge.endNodeId;
                 const endNodeId = lastEdge.isForward ? lastEdge.edge.endNodeId : lastEdge.edge.startNodeId;
-                const minEdgeId = min(fullPath.map((orientedEdge) => orientedEdge.edge.id), compareIds);
-                const innerLocations = flatMap(fullPath, (pathEdge) => {
+                const minEdgeId = min(path.map((pathEdge) => pathEdge.edge.id), compareIds);
+                const innerLocations = flatMap(path, (pathEdge) => {
                     // Take the start node and inner locations from each edge,
                     // then slice off the first node after concatenating.
                     const {
@@ -145,11 +143,11 @@ export default class Graph {
                     endNodeId,
                     innerLocations,
                 };
-                const nodeIdsToDelete = flatMap(fullPath, (orientedEdge) => {
-                    const { startNodeId, endNodeId } = orientedEdge.edge;
-                    return [startNodeId, endNodeId];
-                }).filter((nodeId) => nodeId !== startNodeId && nodeId !== endNodeId);
-                const edgesSeen = fullPath.map((pathEdge) => pathEdge.edge);
+                const nodeIdsToDelete = flatMap(
+                    path,
+                    (pathEdge) => [pathEdge.edge.startNodeId, pathEdge.edge.endNodeId],
+                ).filter((nodeId) => nodeId !== startNodeId && nodeId !== endNodeId);
+                const edgesSeen = path.map((pathEdge) => pathEdge.edge);
                 nodeIdsToDelete.forEach((nodeId) => newNodesById.delete(nodeId));
                 edgesSeen.forEach((seenEdge) => remainingEdges.delete(seenEdge));
                 newEdges.push(newEdge);
@@ -175,15 +173,33 @@ export default class Graph {
     }
 
     /**
-     * Starting from a given edge and direction, follows along consecutive
-     * edges as long as there is only one way to do so, i.e. until reaching a
-     * fork. Returns an array of the oriented edges seen, including the start
-     * edge.
+     * Starting from a given edge, follow along consecutive edges in both
+     * directions as long as there is only one way to do so, i.e. until
+     * reaching a fork. Returns an array of the edges seen, oriented so that
+     * the start edge is oriented forward.
+     * 
+     * In the case of an isolated loop, the returned path will begin and end at
+     * the start node of the provided edge.
+     */
+    private getOnlyPath(edge: Edge): OrientedEdge[] {
+        const forwardPath = this.getOnlyPathInDirection({ edge, isForward: true });
+        if (forwardPath.length > 1 && forwardPath[0] === forwardPath[forwardPath.length - 1]) {
+            // We are in a loop.
+            return forwardPath.slice(0, forwardPath.length - 1);
+        } else {
+            const backwardsPath = this.getOnlyPathInDirection({ edge, isForward: false });
+            return [...reversePath(backwardsPath.slice(1)), ...forwardPath];
+        }
+    }
+
+    /**
+     * Like getOnlyPath(), but only in one direction. The returned path will
+     * start with the provided edge in and proceed in the direction specified.
      * 
      * If the edge is part of an isolated loop (so no fork is found), then the
      * last element of the returned array will be the same as the first one.
      */
-    private getOnlyPath(startEdge: OrientedEdge): OrientedEdge[] {
+    private getOnlyPathInDirection(startEdge: OrientedEdge): OrientedEdge[] {
         const path: OrientedEdge[] = [];
         let currentEdge = startEdge;
         while (true) {

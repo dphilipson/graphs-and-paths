@@ -377,4 +377,18 @@ describe("coalesced()", () => {
         expect(graph.getAllNodes()).to.deep.equal(expectedGraph.getAllNodes());
         expect(graph.getAllEdges()).to.deep.equal(expectedGraph.getAllEdges());
     });
+
+    it("should handle an isolated cycle", () => {
+        const expectedNodes: SimpleNode[] = [{ id: "A", location: { x: 0, y: 0 } }];
+        const expectedEdges: SimpleEdge[] = [{
+            id: "AB",
+            startNodeId: "A",
+            endNodeId: "A",
+            innerLocations: [{ x: 1, y: 0 }, { x: 0, y: 1 }],
+        }];
+        const graph = TestGraphs.getTriangle().coalesced();
+        const expectedGraph = Graph.create(expectedNodes, expectedEdges);
+        expect(graph.getAllNodes()).to.deep.equal(expectedGraph.getAllNodes());
+        expect(graph.getAllEdges()).to.deep.equal(expectedGraph.getAllEdges());
+    });
 });
