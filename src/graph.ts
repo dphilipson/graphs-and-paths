@@ -116,10 +116,10 @@ export default class Graph {
     }
 
     public coalesced(): Graph {
-        const remainingEdges = new Set(this.edgesById.values());
+        const remainingEdgesById = new Map(this.edgesById.entries());
         const newNodesById = new Map(this.nodesById.entries());
         const newEdges: SimpleEdge[] = [];
-        remainingEdges.forEach((edge) => {
+        remainingEdgesById.forEach((edge) => {
             const path = this.getOnlyPath(edge);
             if (path.length === 1) {
                 newEdges.push(edge);
@@ -154,7 +154,7 @@ export default class Graph {
                 // Maps allow deletion during iteration. Deleted entries are not iterated over,
                 // which is what we want.
                 nodeIdsToDelete.forEach((nodeId) => newNodesById.delete(nodeId));
-                edgesSeen.forEach((seenEdge) => remainingEdges.delete(seenEdge));
+                edgesSeen.forEach((seenEdge) => remainingEdgesById.delete(seenEdge.id));
                 newEdges.push(newEdge);
             }
         });
@@ -176,21 +176,21 @@ export default class Graph {
 
     public getConnectedComponentOfNode(nodeId: NodeId): Graph {
         const startNode = this.getNode(nodeId);
-        const nodesSeen = new Set([startNode]);
+        const nodesIdsSeen = new Set([startNode.id]);
         const edgeIds = new Set<EdgeId>();
         const pending = [startNode];
         while (pending.length > 0) {
             const currentNode = pending.pop() as Node; // Not undefined because we just checked the length.
             currentNode.edgeIds.forEach((edgeId) => edgeIds.add(edgeId));
             this.getNeighbors(currentNode.id)
-                .filter((neighbor) => !nodesSeen.has(neighbor))
+                .filter((neighbor) => !nodesIdsSeen.has(neighbor.id))
                 .forEach((neighbor) => {
-                    nodesSeen.add(neighbor);
+                    nodesIdsSeen.add(neighbor.id);
                     pending.push(neighbor);
                 });
         }
         // Filter from original nodes/edges to preserve their order.
-        const nodes = this.getAllNodes().filter((n) => nodesSeen.has(n));
+        const nodes = this.getAllNodes().filter((n) => nodesIdsSeen.has(n.id));
         const edges = this.getAllEdges().filter((e) => edgeIds.has(e.id));
         return Graph.create(nodes, edges);
     }
