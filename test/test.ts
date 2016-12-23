@@ -426,6 +426,39 @@ describe("getConnectedComponents()", () => {
     });
 });
 
+describe("getConnectedComponentsForNode()", () => {
+    it("should return the original graph if connected", () => {
+        const graph = TestGraphs.getTwoNodes();
+        const component = graph.getConnectedComponentOfNode("A");
+        expectGraphsToBeEqual(component, graph);
+    });
+
+    it("should return a single componenet if disconnected", () => {
+        const nodeA = { id: "A", location: { x: 0, y: 0 } };
+        const nodeB = { id: "B", location: { x: 1, y: 0 } };
+        const nodeO = { id: "O", location: { x: 0, y: 1 } };
+        const nodeX = { id: "X", location: { x: 2, y: 0 } };
+        const nodeY = { id: "Y", location: { x: 2, y: 1 } };
+
+        const edgeAB = { id: "AB", startNodeId: "A", endNodeId: "B" };
+        const edgeXY = { id: "XY", startNodeId: "X", endNodeId: "Y" };
+
+        const nodes: SimpleNode[] = [nodeA, nodeB, nodeO, nodeX, nodeY];
+        const edges: SimpleEdge[] = [edgeAB, edgeXY];
+        const expectedNodes: SimpleNode[] = [nodeA, nodeB];
+        const expectedEdges: SimpleEdge[] = [edgeAB];
+        const component = Graph.create(nodes, edges).getConnectedComponentOfNode("A");
+        const expectedComponent = Graph.create(expectedNodes, expectedEdges);
+        expectGraphsToBeEqual(component, expectedComponent);
+    });
+
+    it("should work if cycles are present", () => {
+        const graph = TestGraphs.getTriangle();
+        const component = graph.getConnectedComponentOfNode("A");
+        expectGraphsToBeEqual(component, graph);
+    });
+});
+
 function expectGraphsToBeEqual(actual: Graph, expected: Graph): void {
     expect(actual.getAllNodes()).to.deep.equal(expected.getAllNodes());
     expect(actual.getAllEdges()).to.deep.equal(expected.getAllEdges());

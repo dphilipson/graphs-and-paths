@@ -163,12 +163,33 @@ export default class Graph {
         const components: Graph[] = [];
         this.getAllNodes().forEach((node) => {
             if (!nodesIdsSeen.has(node.id)) {
-                const component = this.getConnectedComponentOfNode(node);
+                const component = this.getConnectedComponentOfNode(node.id);
                 component.getAllNodes().forEach((n) => nodesIdsSeen.add(n.id));
                 components.push(component);
             }
         });
         return components;
+    }
+
+    public getConnectedComponentOfNode(nodeId: NodeId): Graph {
+        const startNode = this.getNode(nodeId);
+        const nodesSeen = new Set([startNode]);
+        const edgeIds = new Set<EdgeId>();
+        const pending = [startNode];
+        while (pending.length > 0) {
+            const currentNode = pending.pop() as Node; // Not undefined because we just checked the length.
+            currentNode.edgeIds.forEach((edgeId) => edgeIds.add(edgeId));
+            this.getNeighbors(currentNode.id)
+                .filter((neighbor) => !nodesSeen.has(neighbor))
+                .forEach((neighbor) => {
+                    nodesSeen.add(neighbor);
+                    pending.push(neighbor);
+                });
+        }
+        // Filter from original nodes/edges to preserve their order.
+        const nodes = this.getAllNodes().filter((n) => nodesSeen.has(n));
+        const edges = this.getAllEdges().filter((e) => edgeIds.has(e.id));
+        return Graph.create(nodes, edges);
     }
 
     private getNodeOrThrow(nodeId: NodeId): Node {
@@ -236,25 +257,5 @@ export default class Graph {
                 currentEdge = { edge: nextEdge, isForward };
             }
         }
-    }
-
-    private getConnectedComponentOfNode(node: Node): Graph {
-        const nodesSeen = new Set([node]);
-        const edgeIds = new Set<EdgeId>();
-        const pending = [node];
-        while (pending.length > 0) {
-            const currentNode = pending.pop() as Node; // Not undefined because we just checked the length.
-            currentNode.edgeIds.forEach((edgeId) => edgeIds.add(edgeId));
-            this.getNeighbors(currentNode.id)
-                .filter((neighbor) => !nodesSeen.has(neighbor))
-                .forEach((neighbor) => {
-                    nodesSeen.add(neighbor);
-                    pending.push(neighbor);
-                });
-        }
-        // Filter from original nodes/edges to preserve their order.
-        const nodes = this.getAllNodes().filter((n) => nodesSeen.has(n));
-        const edges = this.getAllEdges().filter((e) => edgeIds.has(e.id));
-        return Graph.create(nodes, edges);
     }
 }
