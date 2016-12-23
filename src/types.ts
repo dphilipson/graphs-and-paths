@@ -36,3 +36,11 @@ export interface OrientedEdge {
     edge: Edge;
     isForward: boolean;
 }
+
+export interface Path {
+    start: EdgePoint;
+    end: EdgePoint;
+    orientedEdges: OrientedEdge[];
+    nodes: Node[];
+    length: number;
+}

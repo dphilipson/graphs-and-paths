@@ -41,7 +41,7 @@ function clamp(x: number, min: number, max: number): number {
     return Math.max(min, Math.min(max, x));
 }
 
-function distanceBetween(location1: Location, location2: Location): number {
+export function distanceBetween(location1: Location, location2: Location): number {
     const dx = location2.x - location1.x;
     const dy = location2.y - location1.y;
     return Math.sqrt(dx * dx + dy * dy);

@@ -1,6 +1,6 @@
 import { expect } from "chai";
 import Graph from "../src/graph";
-import { Location, SimpleEdge, SimpleNode } from "../src/types";
+import { EdgePoint, Location, Path, SimpleEdge, SimpleNode } from "../src/types";
 import * as TestGraphs from "./testGraphs";
 
 describe("constructor", () => {
@@ -256,30 +256,19 @@ describe("coalesced()", () => {
     });
 
     it("should coalesce segmented curve into single curve", () => {
-        const nodes: SimpleNode[] = [
-            { id: "A", location: { x: 0, y: 0 } },
-            { id: "B", location: { x: 1, y: 0 } },
-            { id: "C", location: { x: 1, y: 1 } },
-            { id: "D", location: { x: 2, y: 1 } },
-        ];
-        const edges: SimpleEdge[] = [
-            { id: "AB", startNodeId: "A", endNodeId: "B" },
-            { id: "BC", startNodeId: "B", endNodeId: "C" },
-            { id: "CD", startNodeId: "C", endNodeId: "D" },
-        ];
+        const graph = TestGraphs.getFourNodes().coalesced();
         const expectedNodes: SimpleNode[] = [
             { id: "A", location: { x: 0, y: 0 } },
-            { id: "D", location: { x: 2, y: 1 } },
+            { id: "D", location: { x: 3, y: 0 } },
         ];
         const expectedEdges: SimpleEdge[] = [
             {
                 id: "AB",
                 startNodeId: "A",
                 endNodeId: "D",
-                innerLocations: [{ x: 1, y: 0 }, { x: 1, y: 1 }],
+                innerLocations: [{ x: 1, y: 0 }, { x: 2, y: 0 }],
             },
         ];
-        const graph = Graph.create(nodes, edges).coalesced();
         const expectedGraph = Graph.create(expectedNodes, expectedEdges);
         expectGraphsToBeEqual(graph, expectedGraph);
     });
@@ -456,6 +445,132 @@ describe("getConnectedComponentsForNode()", () => {
         const graph = TestGraphs.getTriangle();
         const component = graph.getConnectedComponentOfNode("A");
         expectGraphsToBeEqual(component, graph);
+    });
+});
+
+describe("getShortestPath()", () => {
+    it("should return a path crossing over nodes", () => {
+        const graph = TestGraphs.getFourNodes();
+        const start: EdgePoint = { edgeId: "AB", distance: 0.5 };
+        const end: EdgePoint = { edgeId: "CD", distance: 0.5 };
+        const expectedPath: Path = {
+            start,
+            end,
+            orientedEdges: [
+                { edge: graph.getEdge("AB"), isForward: true },
+                { edge: graph.getEdge("BC"), isForward: true },
+                { edge: graph.getEdge("CD"), isForward: true },
+            ],
+            nodes: [graph.getNode("B"), graph.getNode("C")],
+            length: 2,
+        };
+        const path = graph.getShortestPath(start, end);
+        expect(path).to.deep.equal(expectedPath);
+    });
+
+    it("should return a path crossing over nodes in reverse", () => {
+        const graph = TestGraphs.getFourNodes();
+        const start: EdgePoint = { edgeId: "CD", distance: 0.5 };
+        const end: EdgePoint = { edgeId: "AB", distance: 0.5 };
+        const expectedPath: Path = {
+            start,
+            end,
+            orientedEdges: [
+                { edge: graph.getEdge("CD"), isForward: false },
+                { edge: graph.getEdge("BC"), isForward: false },
+                { edge: graph.getEdge("AB"), isForward: false },
+            ],
+            nodes: [graph.getNode("C"), graph.getNode("B")],
+            length: 2,
+        };
+        const path = graph.getShortestPath(start, end);
+        expect(path).to.deep.equal(expectedPath);
+    });
+
+    it("should return the shortest path in a triangle", () => {
+        const graph = TestGraphs.getTriangle();
+        const start: EdgePoint = { edgeId: "CA", distance: 0.75 };
+        const end: EdgePoint = { edgeId: "BC", distance: 0.25 };
+        const expectedPath: Path = {
+            start,
+            end,
+            orientedEdges: [
+                { edge: graph.getEdge("CA"), isForward: true },
+                { edge: graph.getEdge("AB"), isForward: true },
+                { edge: graph.getEdge("BC"), isForward: true },
+            ],
+            nodes: [graph.getNode("A"), graph.getNode("B")],
+            length: 1.5,
+        };
+        const path = graph.getShortestPath(start, end);
+        expect(path).to.deep.equal(expectedPath);
+    });
+
+    it("should return single edge path if start and end are on the same edge", () => {
+        const graph = TestGraphs.getTwoNodes();
+        const start: EdgePoint = { edgeId: "AB", distance: 0.25 };
+        const end: EdgePoint = { edgeId: "AB", distance: 0.75 };
+        const expectedPath: Path = {
+            start,
+            end,
+            orientedEdges: [{ edge: graph.getEdge("AB"), isForward: true }],
+            nodes: [],
+            length: 0.5,
+        };
+        const path = graph.getShortestPath(start, end);
+        expect(path).to.deep.equal(expectedPath);
+    });
+
+    it("should return single edge path if start and end are on the same edge in reverse", () => {
+        // Same as last test but with start and end switched.
+        const graph = TestGraphs.getTwoNodes();
+        const start: EdgePoint = { edgeId: "AB", distance: 0.75 };
+        const end: EdgePoint = { edgeId: "AB", distance: 0.25 };
+        const expectedPath: Path = {
+            start,
+            end,
+            orientedEdges: [{ edge: graph.getEdge("AB"), isForward: false }],
+            nodes: [],
+            length: 0.5,
+        };
+        const path = graph.getShortestPath(start, end);
+        expect(path).to.deep.equal(expectedPath);
+    });
+
+    it("should work if start and end are on the same edge but shortest path goes through other edges", () => {
+        const nodes: SimpleNode[] = [
+            { id: "A", location: { x: 0, y: 0 } },
+            { id: "B", location: { x: 1, y: 0 } },
+        ];
+        const edges: SimpleEdge[] = [
+            {
+                id: "longEdge",
+                startNodeId: "A",
+                endNodeId: "B",
+                innerLocations: [{ x: 0, y: 1 }, { x: 1, y: 1 }],
+            },
+            {
+                id: "shortEdge",
+                startNodeId: "A",
+                endNodeId: "B",
+            },
+        ];
+        const graph = Graph.create(nodes, edges);
+        const start = { edgeId: "longEdge", distance: 0.25 };
+        const end = { edgeId: "longEdge", distance: 2.75 };
+        const expectedPath: Path = {
+            start,
+            end,
+            orientedEdges: [
+                { edge: graph.getEdge("longEdge"), isForward: false },
+                { edge: graph.getEdge("shortEdge"), isForward: true },
+                { edge: graph.getEdge("longEdge"), isForward: false },
+            ],
+            nodes: [graph.getNode("A"), graph.getNode("B")],
+            length: 1.5,
+        };
+        const path = graph.getShortestPath(start, end);
+        expect(path).to.deep.equal(expectedPath);
     });
 });
 
