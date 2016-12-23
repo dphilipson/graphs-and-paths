@@ -390,7 +390,7 @@ describe("coalesced()", () => {
 
 describe("getConnectedComponents()", () => {
     it("should return the original graph if connected", () => {
-        const graph = TestGraphs.getTriangle();
+        const graph = TestGraphs.getTwoNodes();
         const components = graph.getConnectedComponents();
         expect(components).to.have.lengthOf(1);
         expectGraphsToBeEqual(components[0], graph);
@@ -416,6 +416,13 @@ describe("getConnectedComponents()", () => {
             const expectedComponent = Graph.create(expectedNodes[i], expectedEdges[i]);
             expectGraphsToBeEqual(components[i], expectedComponent);
         }
+    });
+
+    it("should work if cycles are present", () => {
+        const graph = TestGraphs.getTriangle();
+        const components = graph.getConnectedComponents();
+        expect(components).to.have.lengthOf(1);
+        expectGraphsToBeEqual(components[0], graph);
     });
 });
 

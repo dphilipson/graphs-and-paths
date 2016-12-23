@@ -127,8 +127,8 @@ export default class Graph {
                 const endNodeId = lastEdge.isForward ? lastEdge.edge.endNodeId : lastEdge.edge.startNodeId;
                 const minEdgeId = min(path.map((pathEdge) => pathEdge.edge.id), compareIds);
                 const innerLocations = flatMap(path, (pathEdge) => {
-                    // Take the start node and inner locations from each edge,
-                    // then slice off the first node after concatenating.
+                    // Take the start node and inner locations from each edge, to avoid
+                    // double-counting the endpoints. Slice off the first node after concatenating.
                     const {
                         edge: { startNodeId, endNodeId, innerLocations },
                         isForward,
@@ -148,6 +148,8 @@ export default class Graph {
                     (pathEdge) => [pathEdge.edge.startNodeId, pathEdge.edge.endNodeId],
                 ).filter((nodeId) => nodeId !== startNodeId && nodeId !== endNodeId);
                 const edgesSeen = path.map((pathEdge) => pathEdge.edge);
+                // Maps allow deletion during iteration. Deleted entries are not iterated over,
+                // which is what we want.
                 nodeIdsToDelete.forEach((nodeId) => newNodesById.delete(nodeId));
                 edgesSeen.forEach((seenEdge) => remainingEdges.delete(seenEdge));
                 newEdges.push(newEdge);
@@ -157,7 +159,16 @@ export default class Graph {
     }
 
     public getConnectedComponents(): Graph[] {
-        return [this];
+        const nodesIdsSeen = new Set<NodeId>();
+        const components: Graph[] = [];
+        this.getAllNodes().forEach((node) => {
+            if (!nodesIdsSeen.has(node.id)) {
+                const component = this.getConnectedComponentOfNode(node);
+                component.getAllNodes().forEach((n) => nodesIdsSeen.add(n.id));
+                components.push(component);
+            }
+        });
+        return components;
     }
 
     private getNodeOrThrow(nodeId: NodeId): Node {
@@ -225,5 +236,25 @@ export default class Graph {
                 currentEdge = { edge: nextEdge, isForward };
             }
         }
+    }
+
+    private getConnectedComponentOfNode(node: Node): Graph {
+        const nodesSeen = new Set([node]);
+        const edgeIds = new Set<EdgeId>();
+        const pending = [node];
+        while (pending.length > 0) {
+            const currentNode = pending.pop() as Node; // Not undefined because we just checked the length.
+            currentNode.edgeIds.forEach((edgeId) => edgeIds.add(edgeId));
+            this.getNeighbors(currentNode.id)
+                .filter((neighbor) => !nodesSeen.has(neighbor))
+                .forEach((neighbor) => {
+                    nodesSeen.add(neighbor);
+                    pending.push(neighbor);
+                });
+        }
+        // Filter from original nodes/edges to preserve their order.
+        const nodes = this.getAllNodes().filter((n) => nodesSeen.has(n));
+        const edges = this.getAllEdges().filter((e) => edgeIds.has(e.id));
+        return Graph.create(nodes, edges);
     }
 }
