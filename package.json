@@ -3,6 +3,10 @@
   "version": "0.1.2",
   "description": "Tools for graphs representing physical locations.",
   "main": "dist/index.js",
+  "types": "dist/index",
+  "files": [
+    "dist/"
+  ],
   "scripts": {
     "clean": "rm -rf dist",
     "build": "npm run clean && tsc",
