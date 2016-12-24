@@ -646,7 +646,7 @@ describe("getClosestPoint()", () => {
             { id: "B", location: { x: 12, y: 9 } },
         ];
         const edges: SimpleEdge[] = [{ id: "AB", startNodeId: "A", endNodeId: "B" }];
-        return Graph.create(nodes, edges);
+        return Graph.create(nodes, edges).withClosestPointMesh(0.25);
     })();
 
     it("should return a point at the requested location if it exists", () => {
@@ -668,7 +668,8 @@ describe("getClosestPoint()", () => {
     });
 
     it("should return the closest point among multiple segments", () => {
-        const closestPoint = TestGraphs.getTriangle().getClosestPoint({ x: 0.125, y: 0.25 });
+        const graph = TestGraphs.getTriangle().withClosestPointMesh(0.25);
+        const closestPoint = graph.getClosestPoint({ x: 0.125, y: 0.25 });
         const expected = { edgeId: "CA", distance: 0.75 };
         expect(closestPoint).to.deep.equal(expected);
     });
@@ -684,7 +685,7 @@ describe("getClosestPoint()", () => {
             endNodeId: "B",
             innerLocations: [{x: 0, y: 1}, {x: 1, y: 1}],
         }];
-        const graph = Graph.create(nodes, edges);
+        const graph = Graph.create(nodes, edges).withClosestPointMesh(0.25);
         const closestPoint = graph.getClosestPoint({ x: 0.25, y: 2 });
         const expected = {edgeId: "AB", distance: 1.25};
         expect(closestPoint).to.deep.equal(expected);

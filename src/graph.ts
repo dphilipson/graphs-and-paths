@@ -1,4 +1,6 @@
 import Heap = require("heap");
+import rbush = require("rbush");
+import knn = require("rbush-knn");
 import {
     Edge,
     EdgeId,
@@ -11,17 +13,14 @@ import {
     SimpleEdge,
     SimpleNode,
 } from "./types";
-import {
-    closestPointOnSegment,
-    compareIds,
-    distanceBetween,
-    findFloorIndex,
-    flatMap,
-    getCumulativeDistances,
-    getIntermediateLocation,
-    min,
-    reversePath,
-} from "./utils";
+import * as Utils from "./utils";
+
+interface MeshPoint {
+    x: number;
+    y: number;
+    edgeId: EdgeId;
+    locationIndex: number;
+}
 
 export default class Graph {
     public static create(nodes: SimpleNode[], edges: SimpleEdge[]): Graph {
@@ -51,7 +50,7 @@ export default class Graph {
             const startLocation = start.location;
             const endLocation = end.location;
             const locations = [startLocation, ...innerLocations, endLocation];
-            const locationDistances = getCumulativeDistances(locations);
+            const locationDistances = Utils.getCumulativeDistances(locations);
             const length = locationDistances[locationDistances.length - 1];
             start.edgeIds.push(id);
             end.edgeIds.push(id);
@@ -71,6 +70,7 @@ export default class Graph {
     private constructor(
         private readonly nodesById: Map<NodeId, Node>,
         private readonly edgesById: Map<EdgeId, Edge>,
+        private readonly mesh?: rbush.RBush<MeshPoint>,
     ) { }
 
     public getAllNodes(): Node[] {
@@ -123,8 +123,8 @@ export default class Graph {
         } else if (distance >= length) {
             return endNode.location;
         } else {
-            const i = findFloorIndex(locationDistances, distance);
-            return getIntermediateLocation(locations[i], locations[i + 1], distance - locationDistances[i]);
+            const i = Utils.findFloorIndex(locationDistances, distance);
+            return Utils.getIntermediateLocation(locations[i], locations[i + 1], distance - locationDistances[i]);
         }
     }
 
@@ -141,9 +141,9 @@ export default class Graph {
                 const lastEdge = path[path.length - 1];
                 const startNodeId = firstEdge.isForward ? firstEdge.edge.startNodeId : firstEdge.edge.endNodeId;
                 const endNodeId = lastEdge.isForward ? lastEdge.edge.endNodeId : lastEdge.edge.startNodeId;
-                const minEdgeId = min(path.map((pathEdge) => pathEdge.edge.id), compareIds);
-                const innerLocations = flatMap(path, (pathEdge) => {
-                    // Take the locations from each edge omitting the endpoint, to avoid
+                const minEdgeId = Utils.min(path.map((pathEdge) => pathEdge.edge.id), Utils.compareIds);
+                const innerLocations = Utils.flatMap(path, (pathEdge) => {
+                    // Take the locations from each edge omitting the endpoint to avoid
                     // double-counting nodes. Slice off the first location at the end to be left
                     // with inner locations only.
                     const { edge: { locations}, isForward } = pathEdge;
@@ -156,7 +156,7 @@ export default class Graph {
                     endNodeId,
                     innerLocations,
                 };
-                const nodeIdsToDelete = flatMap(
+                const nodeIdsToDelete = Utils.flatMap(
                     path,
                     (pathEdge) => [pathEdge.edge.startNodeId, pathEdge.edge.endNodeId],
                 ).filter((nodeId) => nodeId !== startNodeId && nodeId !== endNodeId);
@@ -222,7 +222,7 @@ export default class Graph {
         const endLocation = this.getLocation(end);
         const addNodeToPending = (node: Node) => pendingNodes.push({
             nodeId: node.id,
-            cost: distancesFromStart.get(node.id) + distanceBetween(node.location, endLocation),
+            cost: distancesFromStart.get(node.id) + Utils.distanceBetween(node.location, endLocation),
         });
         const cameFrom = new Map<NodeId, Edge>();
         let endEdgeIsForward = true;
@@ -313,29 +313,42 @@ export default class Graph {
         }
     }
 
-    public getClosestPoint(location: Location): EdgePoint {
-        let bestPoint: EdgePoint | null = null;
-        let bestDistance: number = Number.POSITIVE_INFINITY;
-        this.getAllEdges().forEach((edge) => {
-            const { locations, locationDistances } = edge;
-            for (let i = 0, limit = locations.length - 1; i < limit; i++) {
-                const {
-                    distanceDownSegment,
-                    distanceFromLocation,
-                } = closestPointOnSegment(location, locations[i], locations[i + 1]);
-                if (distanceFromLocation < bestDistance) {
-                    bestDistance = distanceFromLocation;
-                    bestPoint = {
-                        edgeId: edge.id,
-                        distance: locationDistances[i] + distanceDownSegment,
-                    };
-                }
+    public withClosestPointMesh(precision: number): Graph {
+        const meshPoints: MeshPoint[] = [];
+        // For each node, choose an arbitrary edge to hold the mesh point.
+        this.getAllNodes().forEach((node) => {
+            const { edgeIds, location: { x, y } } = node;
+            if (edgeIds.length > 0) {
+                const {id: edgeId, startNodeId, locations} = this.getEdge(edgeIds[0]);
+                const locationIndex = startNodeId === node.id ? 0 : locations.length - 2;
+                meshPoints.push({ x, y, edgeId, locationIndex });
             }
         });
-        if (bestPoint == null) {
-            throw new Error("Cannot find closest edge point on graph with no edges");
+        this.getAllEdges().forEach((edge) => {
+            const { id: edgeId, length, locations, locationDistances } = edge;
+            const numSegments = Math.ceil(length / precision);
+            const stepDistance = length / numSegments;
+            for (let i = 1; i < numSegments; i++) {
+                const distance = i * stepDistance;
+                const { x, y } = this.getLocation({ edgeId, distance });
+                const locationIndex = Utils.findFloorIndex(locationDistances, distance);
+                meshPoints.push({ x, y, edgeId, locationIndex });
+            }
+        });
+        const tree = rbush<MeshPoint>(9, [".x", ".y", ".x", ".y"])
+            .load(meshPoints);
+        return new Graph(this.nodesById, this.edgesById, tree);
+    }
+
+    public getClosestPoint(location: Location): EdgePoint {
+        if (this.mesh) {
+            return this.getClosestPointWithMesh(location, this.mesh);
+        } else {
+            console.warn(
+                "getClosestPoint() called on Graph without precomputed mesh. For improved performance, call"
+                + " .withClosestPointMesh() to get a new optimized graph.");
+            return this.getClosestPointWithoutMesh(location);
         }
-        return bestPoint;
     }
 
     private getNodeOrThrow(nodeId: NodeId): Node {
@@ -370,7 +383,7 @@ export default class Graph {
             return forwardPath.slice(0, forwardPath.length - 1);
         } else {
             const backwardsPath = this.getOnlyPathInDirection({ edge, isForward: false });
-            return [...reversePath(backwardsPath.slice(1)), ...forwardPath];
+            return [...Utils.reversePath(backwardsPath.slice(1)), ...forwardPath];
         }
     }
 
@@ -462,5 +475,39 @@ export default class Graph {
             nodes: [],
             length: Math.abs(start.distance - end.distance),
         };
+    }
+
+    private getClosestPointWithMesh(location: Location, mesh: rbush.RBush<MeshPoint>): EdgePoint {
+        const { x, y } = location;
+        const [{ edgeId, locationIndex }] = knn(mesh, x, y, 1);
+        const { locations, locationDistances } = this.getEdgeOrThrow(edgeId);
+        const { distanceDownSegment } =
+            Utils.closestPointOnSegment(location, locations[locationIndex], locations[locationIndex + 1]);
+        return { edgeId, distance: locationDistances[locationIndex] + distanceDownSegment };
+    }
+
+    private getClosestPointWithoutMesh(location: Location): EdgePoint {
+        let bestPoint: EdgePoint | null = null;
+        let bestDistance: number = Number.POSITIVE_INFINITY;
+        this.getAllEdges().forEach((edge) => {
+            const { locations, locationDistances } = edge;
+            for (let i = 0, limit = locations.length - 1; i < limit; i++) {
+                const {
+                    distanceDownSegment,
+                    distanceFromLocation,
+                } = Utils.closestPointOnSegment(location, locations[i], locations[i + 1]);
+                if (distanceFromLocation < bestDistance) {
+                    bestDistance = distanceFromLocation;
+                    bestPoint = {
+                        edgeId: edge.id,
+                        distance: locationDistances[i] + distanceDownSegment,
+                    };
+                }
+            }
+        });
+        if (bestPoint == null) {
+            throw new Error("Cannot find closest edge point on graph with no edges");
+        }
+        return bestPoint;
     }
 }

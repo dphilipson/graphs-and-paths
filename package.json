@@ -1,27 +1,29 @@
 {
   "name": "graphs-and-paths",
-  "version": "1.0.0",
-  "description": "Find the shortest path from one point in a graph to another, including points on edges.",
+  "version": "0.1.0",
+  "description": "Tools for graphs representing physical locations",
   "main": "index.js",
   "scripts": {
     "clean": "rm -rf dist",
     "build": "npm run clean && tsc",
     "lint": "tslint --project .",
     "mocha": "mocha --compilers ts:ts-node/register,tsx:ts-node/register",
-    "mocha-watch": "mocha -w -R min --compilers ts:ts-node/register,tsx:ts-node/register",
+    "mocha-watch": "npm run mocha -- -w -R min",
     "prepublish": "npm run build",
     "test": "npm run lint && npm run mocha",
-    "watch": "rm -rf dist && tsc --watch"
+    "watch": "npm run clean && tsc --watch"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/dphilipson/graphs-and-paths.git"
   },
   "keywords": [
-    "dijkstra",
+    "graph",
+    "pathfinding",
     "shortest",
     "path",
-    "edge"
+    "edge",
+    "dijkstra"    
   ],
   "author": "David Philipson <dphilipson@gmail.com> (http://dphil.me)",
   "license": "MIT",
@@ -41,7 +43,10 @@
   "dependencies": {
     "@types/es6-shim": "^0.31.32",
     "@types/heap": "^0.2.28",
+    "@types/rbush": "^2.0.2",
     "es6-shim": "^0.35.2",
-    "heap": "^0.2.6"
+    "heap": "^0.2.6",
+    "rbush": "^2.0.1",
+    "rbush-knn": "^2.0.0"
   }
 }
