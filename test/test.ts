@@ -1,6 +1,6 @@
 import { expect } from "chai";
 import Graph from "../src/graph";
-import { EdgePoint, Location, Path, SimpleEdge, SimpleNode } from "../src/types";
+import { Edge, EdgePoint, Location, Path, SimpleEdge, SimpleNode } from "../src/types";
 import * as TestGraphs from "./testGraphs";
 
 describe("constructor", () => {
@@ -78,13 +78,16 @@ describe("getAllEdges()", () => {
 
     it("should return the edge on a graph with a single edge", () => {
         const edges = TestGraphs.getTwoNodes().getAllEdges();
-        expect(edges).to.have.lengthOf(1);
-        const [edge] = edges;
-        expect(edge.id).to.equal("AB");
-        expect(edge.startNodeId).to.equal("A");
-        expect(edge.endNodeId).to.equal("B");
-        expect(edge.innerLocations).to.be.empty;
-        expect(edge.length).to.equal(1);
+        const expected: Edge[] = [{
+            id: "AB",
+            startNodeId: "A",
+            endNodeId: "B",
+            innerLocations: [],
+            length: 1,
+            locations: [{x: 0, y: 0}, {x: 1, y: 0}],
+            locationDistances: [0, 1],
+        }];
+        expect(edges).to.deep.equal(expected);
     });
 });
 
@@ -221,30 +224,48 @@ describe("getLocation()", () => {
     });
 });
 
-describe("lengths", () => {
+describe("lengths and innerLocationDistances", () => {
     it("should be correct for edge with no inner locations", () => {
         const nodes: SimpleNode[] = [
-            { id: 0, location: { x: 1, y: 1 } },
-            { id: 1, location: { x: 4, y: -3 } },
+            { id: "A", location: { x: 1, y: 1 } },
+            { id: "B", location: { x: 4, y: -3 } },
         ];
-        const edges: SimpleEdge[] = [{ id: 0, startNodeId: 0, endNodeId: 1 }];
-        const edge = Graph.create(nodes, edges).getEdge(0);
-        expect(edge.length).to.equal(5);
+        const edges: SimpleEdge[] = [{ id: "AB", startNodeId: "A", endNodeId: "B" }];
+        const edge = Graph.create(nodes, edges).getEdge("AB");
+        const expected: Edge = {
+            id: "AB",
+            startNodeId: "A",
+            endNodeId: "B",
+            innerLocations: [],
+            length: 5,
+            locations: [{x: 1, y: 1}, {x: 4, y: -3}],
+            locationDistances: [0, 5],
+        };
+        expect(edge).to.deep.equal(expected);
     });
 
     it("should be correct for edge with inner locations", () => {
         const nodes: SimpleNode[] = [
-            { id: 0, location: { x: 0, y: 0 } },
-            { id: 1, location: { x: 0, y: 6 } },
+            { id: "A", location: { x: 0, y: 0 } },
+            { id: "B", location: { x: 0, y: 6 } },
         ];
         const edges: SimpleEdge[] = [{
-            id: 0,
-            startNodeId: 0,
-            endNodeId: 1,
+            id: "AB",
+            startNodeId: "A",
+            endNodeId: "B",
             innerLocations: [{ x: 4, y: 3 }],
         }];
-        const edge = Graph.create(nodes, edges).getEdge(0);
-        expect(edge.length).to.equal(10);
+        const edge = Graph.create(nodes, edges).getEdge("AB");
+        const expected: Edge = {
+            id: "AB",
+            startNodeId: "A",
+            endNodeId: "B",
+            innerLocations: [{ x: 4, y: 3 }],
+            length: 10,
+            locations: [{x: 0, y: 0}, {x: 4, y: 3}, {x: 0, y: 6}],
+            locationDistances: [0, 5, 10],
+        };
+        expect(edge).to.deep.equal(expected);
     });
 });
 
@@ -598,7 +619,7 @@ describe("advancePath()", () => {
         const expected: Path = {
             start: { edgeId: "CD", distance: 0.25 },
             end: { edgeId: "CD", distance: 0.5 },
-            orientedEdges: [{ edge: graph.getEdge("CD"), isForward: true}],
+            orientedEdges: [{ edge: graph.getEdge("CD"), isForward: true }],
             nodes: [],
             length: 0.25,
         };
@@ -610,11 +631,63 @@ describe("advancePath()", () => {
         const expected: Path = {
             start: { edgeId: "CD", distance: 0.5 },
             end: { edgeId: "CD", distance: 0.5 },
-            orientedEdges: [{ edge: graph.getEdge("CD"), isForward: true}],
+            orientedEdges: [{ edge: graph.getEdge("CD"), isForward: true }],
             nodes: [],
             length: 0,
         };
         expect(advanced).to.deep.equal(expected);
+    });
+});
+
+describe("getClosestPoint()", () => {
+    const angledSegment = (() => {
+        const nodes: SimpleNode[] = [
+            { id: "A", location: { x: 0, y: 0 } },
+            { id: "B", location: { x: 12, y: 9 } },
+        ];
+        const edges: SimpleEdge[] = [{ id: "AB", startNodeId: "A", endNodeId: "B" }];
+        return Graph.create(nodes, edges);
+    })();
+
+    it("should return a point at the requested location if it exists", () => {
+        const closestPoint = angledSegment.getClosestPoint({ x: 4, y: 3 });
+        const expected: EdgePoint = { edgeId: "AB", distance: 5 };
+        expect(closestPoint).to.deep.equal(expected);
+    });
+
+    it("should return the closest point in the middle of a segment", () => {
+        const closestPoint = angledSegment.getClosestPoint({ x: 5, y: 10 });
+        const expected: EdgePoint = { edgeId: "AB", distance: 10 };
+        expect(closestPoint).to.deep.equal(expected);
+    });
+
+    it("should return the closest point at the end of a segment", () => {
+        const closestPoint = angledSegment.getClosestPoint({ x: 15, y: 15 });
+        const expected: EdgePoint = { edgeId: "AB", distance: 15 };
+        expect(closestPoint).to.deep.equal(expected);
+    });
+
+    it("should return the closest point among multiple segments", () => {
+        const closestPoint = TestGraphs.getTriangle().getClosestPoint({ x: 0.125, y: 0.25 });
+        const expected = { edgeId: "CA", distance: 0.75 };
+        expect(closestPoint).to.deep.equal(expected);
+    });
+
+    it("should work for edge with inner locations", () => {
+        const nodes: SimpleNode[] = [
+            {id: "A", location: {x: 0, y: 0}},
+            {id: "B", location: {x: 1, y: 0}},
+        ];
+        const edges: SimpleEdge[] = [{
+            id: "AB",
+            startNodeId: "A",
+            endNodeId: "B",
+            innerLocations: [{x: 0, y: 1}, {x: 1, y: 1}],
+        }];
+        const graph = Graph.create(nodes, edges);
+        const closestPoint = graph.getClosestPoint({ x: 0.25, y: 2 });
+        const expected = {edgeId: "AB", distance: 1.25};
+        expect(closestPoint).to.deep.equal(expected);
     });
 });
 

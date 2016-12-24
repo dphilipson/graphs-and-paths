@@ -14,12 +14,12 @@ import {
 import {
     compareIds,
     distanceBetween,
+    findFloorIndex,
     flatMap,
-    getLocationAlongPath,
-    getPathLength,
+    getCumulativeDistances,
+    getIntermediateLocation,
     min,
     reversePath,
-    unimplemented,
 } from "./utils";
 
 export default class Graph {
@@ -49,11 +49,20 @@ export default class Graph {
             }
             const startLocation = start.location;
             const endLocation = end.location;
-            const path = [startLocation, ...innerLocations, endLocation];
-            const length = getPathLength(path);
+            const locations = [startLocation, ...innerLocations, endLocation];
+            const locationDistances = getCumulativeDistances(locations);
+            const length = locationDistances[locationDistances.length - 1];
             start.edgeIds.push(id);
             end.edgeIds.push(id);
-            edgesById.set(id, { id, startNodeId, endNodeId, length, innerLocations });
+            edgesById.set(id, {
+                id,
+                startNodeId,
+                endNodeId,
+                innerLocations,
+                length,
+                locations,
+                locationDistances,
+            });
         });
         return new Graph(nodesById, edgesById);
     }
@@ -106,13 +115,16 @@ export default class Graph {
 
     public getLocation(edgePoint: EdgePoint): Location {
         const { edgeId, distance } = edgePoint;
-        const { length, innerLocations } = this.getEdgeOrThrow(edgeId);
+        const { length, locations, locationDistances } = this.getEdgeOrThrow(edgeId);
         const [startNode, endNode] = this.getEndpointsOfEdge(edgeId);
-        if (distance >= length) {
+        if (distance < 0) {
+            return startNode.location;
+        } else if (distance >= length) {
             return endNode.location;
+        } else {
+            const i = findFloorIndex(locationDistances, distance);
+            return getIntermediateLocation(locations[i], locations[i + 1], distance - locationDistances[i]);
         }
-        const path = [startNode.location, ...innerLocations, endNode.location];
-        return getLocationAlongPath(path, distance);
     }
 
     public coalesced(): Graph {
@@ -130,15 +142,12 @@ export default class Graph {
                 const endNodeId = lastEdge.isForward ? lastEdge.edge.endNodeId : lastEdge.edge.startNodeId;
                 const minEdgeId = min(path.map((pathEdge) => pathEdge.edge.id), compareIds);
                 const innerLocations = flatMap(path, (pathEdge) => {
-                    // Take the start node and inner locations from each edge, to avoid
-                    // double-counting the endpoints. Slice off the first node after concatenating.
-                    const {
-                        edge: { startNodeId, endNodeId, innerLocations },
-                        isForward,
-                    } = pathEdge;
-                    const firstNodeId = isForward ? startNodeId : endNodeId;
-                    const orientedInnerLocations = isForward ? innerLocations : innerLocations.slice().reverse();
-                    return [this.getNode(firstNodeId).location, ...orientedInnerLocations];
+                    // Take the locations from each edge omitting the endpoint, to avoid
+                    // double-counting nodes. Slice off the first location at the end to be left
+                    // with inner locations only.
+                    const { edge: { locations}, isForward } = pathEdge;
+                    const orientedLocations = isForward ? locations : locations.slice().reverse();
+                    return orientedLocations.slice(0, orientedLocations.length - 1);
                 }).slice(1);
                 const newEdge: SimpleEdge = {
                     id: minEdgeId,
@@ -175,19 +184,19 @@ export default class Graph {
     }
 
     public getConnectedComponentOfNode(nodeId: NodeId): Graph {
-        const startNode = this.getNode(nodeId);
+        const startNode = this.getNodeOrThrow(nodeId);
         const nodesIdsSeen = new Set([startNode.id]);
         const edgeIds = new Set<EdgeId>();
         const pending = [startNode];
         while (pending.length > 0) {
             const currentNode = pending.pop() as Node; // Not undefined because we just checked the length.
             currentNode.edgeIds.forEach((edgeId) => edgeIds.add(edgeId));
-            this.getNeighbors(currentNode.id)
-                .filter((neighbor) => !nodesIdsSeen.has(neighbor.id))
-                .forEach((neighbor) => {
+            this.getNeighbors(currentNode.id).forEach((neighbor) => {
+                if (!nodesIdsSeen.has(neighbor.id)) {
                     nodesIdsSeen.add(neighbor.id);
                     pending.push(neighbor);
-                });
+                }
+            });
         }
         // Filter from original nodes/edges to preserve their order.
         const nodes = this.getAllNodes().filter((n) => nodesIdsSeen.has(n.id));
@@ -202,8 +211,8 @@ export default class Graph {
             nodeId: NodeId | null; // null node ID represents the synthetic "goal" node.
             cost: number;
         }
-        const startEdge = this.getEdge(start.edgeId);
-        const endEdge = this.getEdge(end.edgeId);
+        const startEdge = this.getEdgeOrThrow(start.edgeId);
+        const endEdge = this.getEdgeOrThrow(end.edgeId);
         const doneNodeIds = new Set<NodeId>();
         const distancesFromStart = new Map<NodeId | null, number>();
         distancesFromStart.set(startEdge.startNodeId, start.distance);
@@ -217,8 +226,8 @@ export default class Graph {
         const cameFrom = new Map<NodeId, Edge>();
         let endEdgeIsForward = true;
         let endDistanceFromStart = Number.POSITIVE_INFINITY;
-        addNodeToPending(this.getNode(startEdge.startNodeId));
-        addNodeToPending(this.getNode(startEdge.endNodeId));
+        addNodeToPending(this.getNodeOrThrow(startEdge.startNodeId));
+        addNodeToPending(this.getNodeOrThrow(startEdge.endNodeId));
         while (!pendingNodes.empty()) {
             const currentNodeId = pendingNodes.pop().nodeId;
             if (currentNodeId == null) {
@@ -303,6 +312,10 @@ export default class Graph {
         }
     }
 
+    public getClosestPoint(location: Location): EdgePoint {
+        throw new Error("Not yet implemented");
+    }
+
     private getNodeOrThrow(nodeId: NodeId): Node {
         const node = this.nodesById.get(nodeId);
         if (!node) {
@@ -353,7 +366,7 @@ export default class Graph {
             path.push(currentEdge);
             const nextNodeId =
                 currentEdge.isForward ? currentEdge.edge.endNodeId : currentEdge.edge.startNodeId;
-            const nextNode = this.getNode(nextNodeId);
+            const nextNode = this.getNodeOrThrow(nextNodeId);
             if (nextNode.edgeIds.length !== 2) {
                 return path;
             } else {
@@ -363,7 +376,7 @@ export default class Graph {
                     path.push(startEdge);
                     return path;
                 }
-                const nextEdge = this.getEdge(nextEdgeId);
+                const nextEdge = this.getEdgeOrThrow(nextEdgeId);
                 const isForward = nextEdge.startNodeId === nextNodeId;
                 currentEdge = { edge: nextEdge, isForward };
             }
@@ -381,7 +394,7 @@ export default class Graph {
             // Handle special case of start and end on same edge.
             return this.getShortestPathOnSameEdge(start, end);
         } else {
-            const endEdge = this.getEdge(end.edgeId);
+            const endEdge = this.getEdgeOrThrow(end.edgeId);
             // Build nodes and oriented edge lists starting from end, then reverse.
             const nodes: Node[] = [];
             const orientedEdges: OrientedEdge[] = [{
@@ -390,7 +403,7 @@ export default class Graph {
             }];
             let currentNodeId = endEdgeIsForward ? endEdge.startNodeId : endEdge.endNodeId;
             while (true) {
-                nodes.push(this.getNode(currentNodeId));
+                nodes.push(this.getNodeOrThrow(currentNodeId));
                 const currentEdge = cameFrom.get(currentNodeId);
                 if (currentEdge == null) {
                     break;
@@ -400,7 +413,7 @@ export default class Graph {
                     currentNodeId = this.getOtherEndpoint(currentEdge.id, currentNodeId).id;
                 }
             }
-            const startEdge = this.getEdge(start.edgeId);
+            const startEdge = this.getEdgeOrThrow(start.edgeId);
             const startEdgeIsForward = (() => {
                 if (startEdge.startNodeId === startEdge.endNodeId) {
                     return start.distance < startEdge.length / 2;
@@ -417,7 +430,7 @@ export default class Graph {
 
     private getShortestPathOnSameEdge(start: EdgePoint, end: EdgePoint): Path {
         const orientedEdge: OrientedEdge = {
-            edge: this.getEdge(start.edgeId),
+            edge: this.getEdgeOrThrow(start.edgeId),
             isForward: start.distance <= end.distance,
         };
         return {

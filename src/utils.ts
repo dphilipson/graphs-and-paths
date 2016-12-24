@@ -1,34 +1,49 @@
 import { Edge, Location, OrientedEdge, SimpleEdge } from "./types";
 
-export function getPathLength(path: Location[]): number {
+/**
+ * Given an array of locations representing a path, returns an array of the same size representing
+ * the cumulative distance to each location in the input. Specifically, the ith element of the
+ * returned array is the distance from the start of the path to its ith location. In particular,
+ * this means the first element of the returned array is 0 and the last element is the total length
+ * of the path.
+ */
+export function getCumulativeDistances(path: Location[]): number[] {
     if (path.length === 0) {
-        return 0;
+        return [];
     } else {
         let sum = 0;
+        const distances: number[] = [0];
         for (let i = 0, limit = path.length - 1; i < limit; i++) {
             sum += distanceBetween(path[i], path[i + 1]);
+            distances.push(sum);
         }
-        return sum;
+        return distances;
     }
 }
 
-export function getLocationAlongPath(path: Location[], distance: number): Location {
-    const numPointsInPath = path.length;
-    let distanceLeft = distance;
-    for (let i = 0; i < numPointsInPath - 1; i++) {
-        const segmentStart = path[i];
-        const segmentEnd = path[i + 1];
-        const segmentLength = distanceBetween(segmentStart, segmentEnd);
-        if (distanceLeft <= segmentLength) {
-            return getIntermediateLocation(segmentStart, segmentEnd, distanceLeft);
+/**
+ * Assuming xs is sorted, returns the index of the largest element of xs which is at most x. If all
+ * elements xs are larger than x, then return -1.
+ */
+export function findFloorIndex(xs: number[], x: number): number {
+    // Min-max are inclusive-exclusive.
+    let minIndex = -1;
+    let maxIndex = xs.length;
+    while (minIndex < maxIndex - 1) {
+        const guessIndex = (minIndex + maxIndex) / 2 | 0;
+        const guess = xs[guessIndex];
+        if (guess < x) {
+            minIndex = guessIndex;
+        } else if (guess === x) {
+            return guessIndex;
         } else {
-            distanceLeft -= segmentLength;
+            maxIndex = guessIndex;
         }
     }
-    return path[numPointsInPath - 1];
+    return minIndex;
 }
 
-function getIntermediateLocation(start: Location, end: Location, distance: number): Location {
+export function getIntermediateLocation(start: Location, end: Location, distance: number): Location {
     const length = distanceBetween(start, end);
     const t = clamp(distance / length, 0, 1);
     return {
@@ -66,7 +81,7 @@ export function compareIds(id1: number | string, id2: number | string) {
 
 export function reversePath(edges: OrientedEdge[]): OrientedEdge[] {
     return edges
-        .map(({edge, isForward}) => ({edge, isForward: !isForward}))
+        .map(({edge, isForward}) => ({ edge, isForward: !isForward }))
         .reverse();
 }
 
@@ -81,6 +96,27 @@ export function min<T>(array: T[], comparator: (t1: T, t2: T) => number): T {
     return array.reduce((a, b) => comparator(a, b) < 0 ? a : b);
 }
 
-export function unimplemented(): never {
-    throw new Error("Not yet implemented");
+/**
+ * Returns information about the closest point on segment ab to point p.
+ */
+export function closestPointOnSegment(
+    p: Location,
+    a: Location,
+    b: Location,
+): { distanceDownSegment: number, distanceFromLocation: number } {
+    const apX = p.x - a.x;
+    const apY = p.y - a.y;
+    const abX = b.x - a.x;
+    const abY = b.y - a.y;
+    const ab2 = abX * abX + abY * abY;
+    const apDotAb = apX * abX + apY * abY;
+    const unclampedT = apDotAb / ab2;
+    const t = clamp(unclampedT, 0, 1);
+    const distanceDownSegment = Math.sqrt(ab2);
+    const closestPoint: Location = {
+        x: a.x + t * abX,
+        y: a.y + t * abY,
+    };
+    const distanceFromLocation = distanceBetween(p, closestPoint);
+    return { distanceDownSegment, distanceFromLocation };
 }

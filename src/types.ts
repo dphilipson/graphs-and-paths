@@ -19,7 +19,8 @@ export interface Node extends SimpleNode {
 
 export interface Edge extends SimpleEdge {
     length: number;
-    innerLocations: Location[];
+    locations: Location[];
+    locationDistances: number[];
 }
 
 export interface Location {
