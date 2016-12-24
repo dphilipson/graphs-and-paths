@@ -112,7 +112,7 @@ export function closestPointOnSegment(
     const apDotAb = apX * abX + apY * abY;
     const unclampedT = apDotAb / ab2;
     const t = clamp(unclampedT, 0, 1);
-    const distanceDownSegment = Math.sqrt(ab2);
+    const distanceDownSegment = Math.sqrt(ab2) * t;
     const closestPoint: Location = {
         x: a.x + t * abX,
         y: a.y + t * abY,

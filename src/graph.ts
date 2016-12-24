@@ -12,6 +12,7 @@ import {
     SimpleNode,
 } from "./types";
 import {
+    closestPointOnSegment,
     compareIds,
     distanceBetween,
     findFloorIndex,
@@ -313,7 +314,28 @@ export default class Graph {
     }
 
     public getClosestPoint(location: Location): EdgePoint {
-        throw new Error("Not yet implemented");
+        let bestPoint: EdgePoint | null = null;
+        let bestDistance: number = Number.POSITIVE_INFINITY;
+        this.getAllEdges().forEach((edge) => {
+            const { locations, locationDistances } = edge;
+            for (let i = 0, limit = locations.length - 1; i < limit; i++) {
+                const {
+                    distanceDownSegment,
+                    distanceFromLocation,
+                } = closestPointOnSegment(location, locations[i], locations[i + 1]);
+                if (distanceFromLocation < bestDistance) {
+                    bestDistance = distanceFromLocation;
+                    bestPoint = {
+                        edgeId: edge.id,
+                        distance: locationDistances[i] + distanceDownSegment,
+                    };
+                }
+            }
+        });
+        if (bestPoint == null) {
+            throw new Error("Cannot find closest edge point on graph with no edges");
+        }
+        return bestPoint;
     }
 
     private getNodeOrThrow(nodeId: NodeId): Node {
