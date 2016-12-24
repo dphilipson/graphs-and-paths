@@ -1,16 +1,16 @@
 {
   "name": "graphs-and-paths",
   "version": "0.1.0",
-  "description": "Tools for graphs representing physical locations",
+  "description": "Tools for graphs representing physical locations.",
   "main": "index.js",
   "scripts": {
     "clean": "rm -rf dist",
     "build": "npm run clean && tsc",
+    "jest": "jest --config jest.json",
+    "jest-watch": "npm run jest -- --watch",
     "lint": "tslint --project .",
-    "mocha": "mocha --compilers ts:ts-node/register,tsx:ts-node/register",
-    "mocha-watch": "npm run mocha -- -w -R min",
     "prepublish": "npm run build",
-    "test": "npm run lint && npm run mocha",
+    "test": "npm run lint && npm run jest",
     "watch": "npm run clean && tsc --watch"
   },
   "repository": {
@@ -23,7 +23,7 @@
     "shortest",
     "path",
     "edge",
-    "dijkstra"    
+    "dijkstra"
   ],
   "author": "David Philipson <dphilipson@gmail.com> (http://dphil.me)",
   "license": "MIT",
@@ -32,11 +32,8 @@
   },
   "homepage": "https://github.com/dphilipson/graphs-and-paths#readme",
   "devDependencies": {
-    "@types/chai": "^3.4.34",
-    "@types/mocha": "^2.2.33",
-    "chai": "^3.5.0",
-    "mocha": "^3.2.0",
-    "ts-node": "^1.7.2",
+    "@types/jest": "^16.0.2",
+    "jest": "^18.0.0",
     "tslint": "^4.1.1",
     "typescript": "^2.1.4"
   },

@@ -1,4 +1,3 @@
-import { expect } from "chai";
 import Graph from "../src/graph";
 import { Edge, EdgePoint, Location, Path, SimpleEdge, SimpleNode } from "../src/types";
 import * as TestGraphs from "./testGraphs";
@@ -9,7 +8,7 @@ describe("constructor", () => {
             { id: 0, location: { x: 0, y: 0 } },
             { id: 0, location: { x: 0, y: 1 } },
         ];
-        expect(() => Graph.create(nodes, [])).to.throw(/0/);
+        expect(() => Graph.create(nodes, [])).toThrowError(/0/);
     });
 
     it("should fail if edge ID is repeated", () => {
@@ -22,7 +21,7 @@ describe("constructor", () => {
             { id: 0, startNodeId: 0, endNodeId: 1 },
             { id: 0, startNodeId: 1, endNodeId: 2 },
         ];
-        expect(() => Graph.create(nodes, edges)).to.throw(/0/);
+        expect(() => Graph.create(nodes, edges)).toThrowError(/0/);
     });
 
     it("should fail if edge references nonexistent node", () => {
@@ -31,49 +30,49 @@ describe("constructor", () => {
             { id: 1, location: { x: 0, y: 1 } },
         ];
         const edges: SimpleEdge[] = [{ id: 0, startNodeId: 0, endNodeId: 2 }];
-        expect(() => Graph.create(nodes, edges)).to.throw(/2/);
+        expect(() => Graph.create(nodes, edges)).toThrowError(/2/);
     });
 });
 
 describe("getAllNodes()", () => {
     it("should return nothing on an empty graph", () => {
         const graph = Graph.create([], []);
-        expect(graph.getAllNodes()).to.be.empty;
+        expect(graph.getAllNodes()).toEqual([]);
     });
 
     it("should return a node with no edges if it is entire graph", () => {
         const node = TestGraphs.getSingleNode().getAllNodes()[0];
-        expect(node.id).to.equal(0);
-        expect(node.location).to.deep.equal({ x: 0, y: 0 });
-        expect(node.edgeIds).to.be.empty;
+        expect(node.id).toEqual(0);
+        expect(node.location).toEqual({ x: 0, y: 0 });
+        expect(node.edgeIds).toEqual([]);
     });
 
     it("should return nodes with edge between them on such a graph", () => {
         const nodes = TestGraphs.getTwoNodes().getAllNodes();
-        expect(nodes).to.have.lengthOf(2);
+        expect(nodes.length).toEqual(2);
         const [nodeA, nodeB] = nodes;
-        expect(nodeA.id).to.equal("A");
-        expect(nodeB.id).to.equal("B");
-        expect(nodeA.edgeIds).to.deep.equal(["AB"]);
-        expect(nodeB.edgeIds).to.deep.equal(["AB"]);
+        expect(nodeA.id).toEqual("A");
+        expect(nodeB.id).toEqual("B");
+        expect(nodeA.edgeIds).toEqual(["AB"]);
+        expect(nodeB.edgeIds).toEqual(["AB"]);
     });
 });
 
 describe("getNode()", () => {
     it("should return the requested node", () => {
         const node = TestGraphs.getSingleNode().getNode(0);
-        expect(node.id).to.equal(0);
+        expect(node.id).toEqual(0);
     });
 
     it("should return undefined if node does not exist", () => {
-        expect(TestGraphs.getSingleNode().getNode(1)).to.be.undefined;
+        expect(TestGraphs.getSingleNode().getNode(1)).toBeUndefined;
     });
 });
 
 describe("getAllEdges()", () => {
     it("should return nothing on an empty graph", () => {
         const graph = Graph.create([], []);
-        expect(graph.getAllEdges()).to.be.empty;
+        expect(graph.getAllEdges()).toEqual([]);
     });
 
     it("should return the edge on a graph with a single edge", () => {
@@ -87,18 +86,18 @@ describe("getAllEdges()", () => {
             locations: [{x: 0, y: 0}, {x: 1, y: 0}],
             locationDistances: [0, 1],
         }];
-        expect(edges).to.deep.equal(expected);
+        expect(edges).toEqual(expected);
     });
 });
 
 describe("getEdge()", () => {
     it("should return the requested edge", () => {
         const edge = TestGraphs.getTwoNodes().getEdge("AB");
-        expect(edge.id).to.equal("AB");
+        expect(edge.id).toEqual("AB");
     });
 
     it("should return undefined if edge does not exist", () => {
-        expect(TestGraphs.getTwoNodes().getEdge(1)).to.be.undefined;
+        expect(TestGraphs.getTwoNodes().getEdge(1)).toBeUndefined;
     });
 });
 
@@ -106,48 +105,48 @@ describe("getEdgesOfNode()", () => {
     it("should return edges with node as their endpoint", () => {
         const edges = TestGraphs.getTriangle().getEdgesOfNode("A");
         const edgeIds = edges.map((edge) => edge.id).sort();
-        expect(edgeIds).to.deep.equal(["AB", "CA"]);
+        expect(edgeIds).toEqual(["AB", "CA"]);
     });
 
     it("should throw on nonexistent node ID", () => {
-        expect(() => TestGraphs.getTriangle().getEdgesOfNode(-1)).to.throw(/-1/);
+        expect(() => TestGraphs.getTriangle().getEdgesOfNode(-1)).toThrowError(/-1/);
     });
 });
 
 describe("getEndpointsOfEdge()", () => {
     it("should return nodes at ends of edge", () => {
         const endpoints = TestGraphs.getTriangle().getEndpointsOfEdge("CA");
-        expect(endpoints.map((node) => node.id)).to.deep.equal(["C", "A"]);
+        expect(endpoints.map((node) => node.id)).toEqual(["C", "A"]);
     });
 
     it("should throw on nonexistent edge ID", () => {
-        expect(() => TestGraphs.getTriangle().getEndpointsOfEdge(-1)).to.throw(/-1/);
+        expect(() => TestGraphs.getTriangle().getEndpointsOfEdge(-1)).toThrowError(/-1/);
     });
 });
 
 describe("getOtherEndpoint()", () => {
     it("should return the other endpoint of an edge", () => {
         const endpoint = TestGraphs.getTwoNodes().getOtherEndpoint("AB", "A");
-        expect(endpoint.id).to.equal("B");
+        expect(endpoint.id).toEqual("B");
     });
 
     it("should throw on nonexistent edge ID", () => {
-        expect(() => TestGraphs.getTwoNodes().getOtherEndpoint("TD", "A")).to.throw(/TD/);
+        expect(() => TestGraphs.getTwoNodes().getOtherEndpoint("TD", "A")).toThrowError(/TD/);
     });
 
     it("should throw if node is not an endpoint of edge", () => {
-        expect(() => TestGraphs.getTriangle().getOtherEndpoint("AB", "C")).to.throw(/endpoint/);
+        expect(() => TestGraphs.getTriangle().getOtherEndpoint("AB", "C")).toThrowError(/endpoint/);
     });
 });
 
 describe("getNeighbors()", () => {
     it("should return the neighbors of a node", () => {
         const neighbors = TestGraphs.getTriangle().getNeighbors("A");
-        expect(neighbors.map((node) => node.id).sort()).to.deep.equal(["B", "C"]);
+        expect(neighbors.map((node) => node.id).sort()).toEqual(["B", "C"]);
     });
 
     it("should throw nonexistent node ID", () => {
-        expect(() => TestGraphs.getTriangle().getNeighbors("TD")).to.throw(/TD/);
+        expect(() => TestGraphs.getTriangle().getNeighbors("TD")).toThrowError(/TD/);
     });
 });
 
@@ -166,7 +165,7 @@ describe("getLocation()", () => {
             { x: 40, y: 50 },
         ];
         const actualLocations = distances.map((distance) => graph.getLocation({ edgeId: "AB", distance }));
-        expect(actualLocations).to.deep.equal(expectedLocations);
+        expect(actualLocations).toEqual(expectedLocations);
     });
 
     it("should return the correct location on an edge with inner points", () => {
@@ -190,7 +189,7 @@ describe("getLocation()", () => {
             { x: 2, y: 2 },
         ];
         const actualLocations = distances.map((distance) => graph.getLocation({ edgeId: "AB", distance }));
-        expect(actualLocations).to.deep.equal(expectedLocations);
+        expect(actualLocations).toEqual(expectedLocations);
     });
 
     it("should behave in double imprecision corner case", () => {
@@ -208,19 +207,19 @@ describe("getLocation()", () => {
         }];
         const graph = Graph.create(nodes, edges);
         const { length } = graph.getEdge("AB");
-        expect(graph.getLocation({ edgeId: "AB", distance: length })).to.deep.equal({ x: 2 / 3, y: 1 / 3 });
+        expect(graph.getLocation({ edgeId: "AB", distance: length })).toEqual({ x: 2 / 3, y: 1 / 3 });
     });
 
     it("should throw on nonexistent edgeId", () => {
-        expect(() => TestGraphs.getTriangle().getLocation({ edgeId: "TD", distance: 0 })).to.throw(/TD/);
+        expect(() => TestGraphs.getTriangle().getLocation({ edgeId: "TD", distance: 0 })).toThrowError(/TD/);
     });
 
     it("should return start on negative distance", () => {
-        expect(TestGraphs.getTriangle().getLocation({ edgeId: "AB", distance: -1 })).to.deep.equal({ x: 0, y: 0 });
+        expect(TestGraphs.getTriangle().getLocation({ edgeId: "AB", distance: -1 })).toEqual({ x: 0, y: 0 });
     });
 
     it("should return end on distance greater than edge length", () => {
-        expect(TestGraphs.getTriangle().getLocation({ edgeId: "AB", distance: 10 })).to.deep.equal({ x: 1, y: 0 });
+        expect(TestGraphs.getTriangle().getLocation({ edgeId: "AB", distance: 10 })).toEqual({ x: 1, y: 0 });
     });
 });
 
@@ -241,7 +240,7 @@ describe("lengths and innerLocationDistances", () => {
             locations: [{x: 1, y: 1}, {x: 4, y: -3}],
             locationDistances: [0, 5],
         };
-        expect(edge).to.deep.equal(expected);
+        expect(edge).toEqual(expected);
     });
 
     it("should be correct for edge with inner locations", () => {
@@ -265,7 +264,7 @@ describe("lengths and innerLocationDistances", () => {
             locations: [{x: 0, y: 0}, {x: 4, y: 3}, {x: 0, y: 6}],
             locationDistances: [0, 5, 10],
         };
-        expect(edge).to.deep.equal(expected);
+        expect(edge).toEqual(expected);
     });
 });
 
@@ -402,7 +401,7 @@ describe("getConnectedComponents()", () => {
     it("should return the original graph if connected", () => {
         const graph = TestGraphs.getTwoNodes();
         const components = graph.getConnectedComponents();
-        expect(components).to.have.lengthOf(1);
+        expect(components.length).toEqual(1);
         expectGraphsToBeEqual(components[0], graph);
     });
 
@@ -421,7 +420,7 @@ describe("getConnectedComponents()", () => {
         const expectedNodes: SimpleNode[][] = [[nodeA, nodeB], [nodeO], [nodeX, nodeY]];
         const expectedEdges: SimpleEdge[][] = [[edgeAB], [], [edgeXY]];
         const components = Graph.create(nodes, edges).getConnectedComponents();
-        expect(components).to.have.length(3);
+        expect(components.length).toEqual(3);
         for (let i = 0; i < 3; i++) {
             const expectedComponent = Graph.create(expectedNodes[i], expectedEdges[i]);
             expectGraphsToBeEqual(components[i], expectedComponent);
@@ -431,7 +430,7 @@ describe("getConnectedComponents()", () => {
     it("should work if cycles are present", () => {
         const graph = TestGraphs.getTriangle();
         const components = graph.getConnectedComponents();
-        expect(components).to.have.lengthOf(1);
+        expect(components.length).toEqual(1);
         expectGraphsToBeEqual(components[0], graph);
     });
 });
@@ -486,7 +485,7 @@ describe("getShortestPath()", () => {
             length: 2,
         };
         const path = graph.getShortestPath(start, end);
-        expect(path).to.deep.equal(expectedPath);
+        expect(path).toEqual(expectedPath);
     });
 
     it("should return a path crossing over nodes in reverse", () => {
@@ -505,7 +504,7 @@ describe("getShortestPath()", () => {
             length: 2,
         };
         const path = graph.getShortestPath(start, end);
-        expect(path).to.deep.equal(expectedPath);
+        expect(path).toEqual(expectedPath);
     });
 
     it("should return the shortest path in a triangle", () => {
@@ -524,7 +523,7 @@ describe("getShortestPath()", () => {
             length: 1.5,
         };
         const path = graph.getShortestPath(start, end);
-        expect(path).to.deep.equal(expectedPath);
+        expect(path).toEqual(expectedPath);
     });
 
     it("should return single edge path if start and end are on the same edge", () => {
@@ -539,7 +538,7 @@ describe("getShortestPath()", () => {
             length: 0.5,
         };
         const path = graph.getShortestPath(start, end);
-        expect(path).to.deep.equal(expectedPath);
+        expect(path).toEqual(expectedPath);
     });
 
     it("should return single edge path if start and end are on the same edge in reverse", () => {
@@ -555,7 +554,7 @@ describe("getShortestPath()", () => {
             length: 0.5,
         };
         const path = graph.getShortestPath(start, end);
-        expect(path).to.deep.equal(expectedPath);
+        expect(path).toEqual(expectedPath);
     });
 
     it("should work if start and end are on the same edge but shortest path goes through other edges", () => {
@@ -591,7 +590,8 @@ describe("getShortestPath()", () => {
             length: 1.5,
         };
         const path = graph.getShortestPath(start, end);
-        expect(path).to.deep.equal(expectedPath);
+        expect(path).toEqual(expectedPath);
+        const endTime = Date.now();
     });
 });
 
@@ -611,7 +611,7 @@ describe("advancePath()", () => {
 
     it("should return the same path if distance is zero", () => {
         const advanced = graph.advancePath(path, 0);
-        expect(advanced).to.deep.equal(path);
+        expect(advanced).toEqual(path);
     });
 
     it("should advance path, dropping nodes and edges", () => {
@@ -623,7 +623,7 @@ describe("advancePath()", () => {
             nodes: [],
             length: 0.25,
         };
-        expect(advanced).to.deep.equal(expected);
+        expect(advanced).toEqual(expected);
     });
 
     it("should return a single-point path if distance is greater than length", () => {
@@ -635,7 +635,7 @@ describe("advancePath()", () => {
             nodes: [],
             length: 0,
         };
-        expect(advanced).to.deep.equal(expected);
+        expect(advanced).toEqual(expected);
     });
 });
 
@@ -652,26 +652,26 @@ describe("getClosestPoint()", () => {
     it("should return a point at the requested location if it exists", () => {
         const closestPoint = angledSegment.getClosestPoint({ x: 4, y: 3 });
         const expected: EdgePoint = { edgeId: "AB", distance: 5 };
-        expect(closestPoint).to.deep.equal(expected);
+        expect(closestPoint).toEqual(expected);
     });
 
     it("should return the closest point in the middle of a segment", () => {
         const closestPoint = angledSegment.getClosestPoint({ x: 5, y: 10 });
         const expected: EdgePoint = { edgeId: "AB", distance: 10 };
-        expect(closestPoint).to.deep.equal(expected);
+        expect(closestPoint).toEqual(expected);
     });
 
     it("should return the closest point at the end of a segment", () => {
         const closestPoint = angledSegment.getClosestPoint({ x: 15, y: 15 });
         const expected: EdgePoint = { edgeId: "AB", distance: 15 };
-        expect(closestPoint).to.deep.equal(expected);
+        expect(closestPoint).toEqual(expected);
     });
 
     it("should return the closest point among multiple segments", () => {
         const graph = TestGraphs.getTriangle().withClosestPointMesh(0.25);
         const closestPoint = graph.getClosestPoint({ x: 0.125, y: 0.25 });
         const expected = { edgeId: "CA", distance: 0.75 };
-        expect(closestPoint).to.deep.equal(expected);
+        expect(closestPoint).toEqual(expected);
     });
 
     it("should work for edge with inner locations", () => {
@@ -688,11 +688,11 @@ describe("getClosestPoint()", () => {
         const graph = Graph.create(nodes, edges).withClosestPointMesh(0.25);
         const closestPoint = graph.getClosestPoint({ x: 0.25, y: 2 });
         const expected = {edgeId: "AB", distance: 1.25};
-        expect(closestPoint).to.deep.equal(expected);
+        expect(closestPoint).toEqual(expected);
     });
 });
 
 function expectGraphsToBeEqual(actual: Graph, expected: Graph): void {
-    expect(actual.getAllNodes()).to.deep.equal(expected.getAllNodes());
-    expect(actual.getAllEdges()).to.deep.equal(expected.getAllEdges());
+    expect(actual.getAllNodes()).toEqual(expected.getAllNodes());
+    expect(actual.getAllEdges()).toEqual(expected.getAllEdges());
 }
