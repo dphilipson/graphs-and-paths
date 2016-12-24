@@ -1,4 +1,4 @@
-# Broken Loop
+# Graphs and Paths
 
 Tools for graphs representing physical locations.
 
