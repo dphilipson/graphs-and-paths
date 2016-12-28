@@ -67,6 +67,10 @@ export default class Graph {
         return new Graph(nodesById, edgesById);
     }
 
+    public static distance(location1: Location, location2: Location): number {
+        return Utils.distanceBetween(location1, location2);
+    }
+
     public static advanceAlongLocations(locations: Location[], distance: number): Location[] {
         if (distance < 0) {
             throw new Error("Cannot advance path by negative distance");
@@ -165,11 +169,11 @@ export default class Graph {
                 const startNodeId = firstEdge.isForward ? firstEdge.edge.startNodeId : firstEdge.edge.endNodeId;
                 const endNodeId = lastEdge.isForward ? lastEdge.edge.endNodeId : lastEdge.edge.startNodeId;
                 const minEdgeId = Utils.min(path.map((pathEdge) => pathEdge.edge.id), Utils.compareIds);
-                const locations = Utils.dedupeLocations(Utils.flatMap(path, (pathEdge) => {
-                    const { edge: { locations}, isForward } = pathEdge;
+                const allLocations = Utils.dedupeLocations(Utils.flatMap(path, (pathEdge) => {
+                    const { edge: { locations }, isForward } = pathEdge;
                     return isForward ? locations : locations.slice().reverse();
                 }));
-                const innerLocations = locations.slice(1, locations.length - 1);
+                const innerLocations = allLocations.slice(1, allLocations.length - 1);
                 const newEdge: SimpleEdge = {
                     id: minEdgeId,
                     startNodeId,
@@ -310,7 +314,7 @@ export default class Graph {
             };
         } else if (distance < 0) {
             throw new Error("Cannot advance path by a negative distance");
-        }else {
+        } else {
             const {
                 edge: startEdge,
                 isForward: isStartEdgeForward,

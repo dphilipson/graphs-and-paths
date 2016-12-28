@@ -784,6 +784,17 @@ describe("getClosestPoint()", () => {
     });
 });
 
+describe("distance()", () => {
+    it("should return zero given the same point twice", () => {
+        const location: Location = {x: 1, y: 1};
+        expect(Graph.distance(location, location)).toEqual(0);
+    });
+
+    it("should return the distance between two points", () => {
+        expect(Graph.distance({x: 1, y: 1}, {x: 4, y: 5})).toEqual(5);
+    });
+});
+
 function expectGraphsToBeEqual(actual: Graph, expected: Graph): void {
     expect(actual.getAllNodes()).toEqual(expected.getAllNodes());
     expect(actual.getAllEdges()).toEqual(expected.getAllEdges());
