@@ -1,4 +1,11 @@
-import { Edge, Location, OrientedEdge, SimpleEdge } from "./types";
+import { Location, OrientedEdge } from "./types";
+
+export function last<T>(ts: T[]): T {
+    if (ts.length === 0) {
+        throw new Error("Cannot take last element of empty array");
+    }
+    return ts[ts.length - 1];
+}
 
 /**
  * Given an array of locations representing a path, returns an array of the same size representing
@@ -86,7 +93,7 @@ export function reversePath(edges: OrientedEdge[]): OrientedEdge[] {
 }
 
 export function flatMap<T, U>(array: T[], f: (t: T) => U[]): U[] {
-    return Array.prototype.concat.apply([], array.map(f));
+    return array.reduce((result: U[], t) => pushAll(result, f(t)), []);
 }
 
 export function min<T>(array: T[], comparator: (t1: T, t2: T) => number): T {
@@ -119,4 +126,30 @@ export function closestPointOnSegment(
     };
     const distanceFromLocation = distanceBetween(p, closestPoint);
     return { distanceDownSegment, distanceFromLocation };
+}
+
+export function areLocationsEqual(location1: Location, location2: Location): boolean {
+    return location1.x === location2.x && location1.y === location2.y;
+}
+
+export function dedupeLocations(locations: Location[]): Location[] {
+    return dedupe(locations, areLocationsEqual);
+}
+
+function dedupe<T>(
+    ts: T[],
+    equals = ((t1: T, t2: T) => t1 === t2),
+): T[] {
+    const result: T[] = [];
+    ts.forEach((t) => {
+        if (result.length === 0 || !equals(last(result), t)) {
+            result.push(t);
+        }
+    });
+    return result;
+}
+
+export function pushAll<T>(array: T[], toAdd: T[]): T[] {
+    toAdd.forEach((t) => array.push(t));
+    return array;
 }

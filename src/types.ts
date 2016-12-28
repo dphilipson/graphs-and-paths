@@ -43,5 +43,6 @@ export interface Path {
     end: EdgePoint;
     orientedEdges: OrientedEdge[];
     nodes: Node[];
+    locations: Location[];
     length: number;
 }

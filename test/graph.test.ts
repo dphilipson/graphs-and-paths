@@ -83,7 +83,7 @@ describe("getAllEdges()", () => {
             endNodeId: "B",
             innerLocations: [],
             length: 1,
-            locations: [{x: 0, y: 0}, {x: 1, y: 0}],
+            locations: [{ x: 0, y: 0 }, { x: 1, y: 0 }],
             locationDistances: [0, 1],
         }];
         expect(edges).toEqual(expected);
@@ -237,7 +237,7 @@ describe("lengths and innerLocationDistances", () => {
             endNodeId: "B",
             innerLocations: [],
             length: 5,
-            locations: [{x: 1, y: 1}, {x: 4, y: -3}],
+            locations: [{ x: 1, y: 1 }, { x: 4, y: -3 }],
             locationDistances: [0, 5],
         };
         expect(edge).toEqual(expected);
@@ -261,7 +261,7 @@ describe("lengths and innerLocationDistances", () => {
             endNodeId: "B",
             innerLocations: [{ x: 4, y: 3 }],
             length: 10,
-            locations: [{x: 0, y: 0}, {x: 4, y: 3}, {x: 0, y: 6}],
+            locations: [{ x: 0, y: 0 }, { x: 4, y: 3 }, { x: 0, y: 6 }],
             locationDistances: [0, 5, 10],
         };
         expect(edge).toEqual(expected);
@@ -482,6 +482,12 @@ describe("getShortestPath()", () => {
                 { edge: graph.getEdge("CD"), isForward: true },
             ],
             nodes: [graph.getNode("B"), graph.getNode("C")],
+            locations: [
+                { x: 0.5, y: 0 },
+                { x: 1, y: 0 },
+                { x: 2, y: 0 },
+                { x: 2.5, y: 0 },
+            ],
             length: 2,
         };
         const path = graph.getShortestPath(start, end);
@@ -501,6 +507,12 @@ describe("getShortestPath()", () => {
                 { edge: graph.getEdge("AB"), isForward: false },
             ],
             nodes: [graph.getNode("C"), graph.getNode("B")],
+            locations: [
+                { x: 2.5, y: 0 },
+                { x: 2, y: 0 },
+                { x: 1, y: 0 },
+                { x: 0.5, y: 0 },
+            ],
             length: 2,
         };
         const path = graph.getShortestPath(start, end);
@@ -508,9 +520,20 @@ describe("getShortestPath()", () => {
     });
 
     it("should return the shortest path in a triangle", () => {
-        const graph = TestGraphs.getTriangle();
-        const start: EdgePoint = { edgeId: "CA", distance: 0.75 };
-        const end: EdgePoint = { edgeId: "BC", distance: 0.25 };
+        // A 15-20-25 right triangle.
+        const nodes: SimpleNode[] = [
+            { id: "A", location: { x: 0, y: 0 } },
+            { id: "B", location: { x: 15, y: 0 } },
+            { id: "C", location: { x: 0, y: 20 } },
+        ];
+        const edges: SimpleEdge[] = [
+            { id: "AB", startNodeId: "A", endNodeId: "B" },
+            { id: "BC", startNodeId: "B", endNodeId: "C" },
+            { id: "CA", startNodeId: "C", endNodeId: "A" },
+        ];
+        const graph = Graph.create(nodes, edges);
+        const start: EdgePoint = { edgeId: "CA", distance: 15 };
+        const end: EdgePoint = { edgeId: "BC", distance: 5 };
         const expectedPath: Path = {
             start,
             end,
@@ -520,7 +543,13 @@ describe("getShortestPath()", () => {
                 { edge: graph.getEdge("BC"), isForward: true },
             ],
             nodes: [graph.getNode("A"), graph.getNode("B")],
-            length: 1.5,
+            locations: [
+                { x: 0, y: 5 },
+                { x: 0, y: 0 },
+                { x: 15, y: 0 },
+                { x: 12, y: 4 },
+            ],
+            length: 25,
         };
         const path = graph.getShortestPath(start, end);
         expect(path).toEqual(expectedPath);
@@ -535,6 +564,7 @@ describe("getShortestPath()", () => {
             end,
             orientedEdges: [{ edge: graph.getEdge("AB"), isForward: true }],
             nodes: [],
+            locations: [{ x: 0.25, y: 0 }, { x: 0.75, y: 0 }],
             length: 0.5,
         };
         const path = graph.getShortestPath(start, end);
@@ -551,6 +581,7 @@ describe("getShortestPath()", () => {
             end,
             orientedEdges: [{ edge: graph.getEdge("AB"), isForward: false }],
             nodes: [],
+            locations: [{ x: 0.75, y: 0 }, { x: 0.25, y: 0 }],
             length: 0.5,
         };
         const path = graph.getShortestPath(start, end);
@@ -558,6 +589,7 @@ describe("getShortestPath()", () => {
     });
 
     it("should work if start and end are on the same edge but shortest path goes through other edges", () => {
+        const startTime = Date.now();
         const nodes: SimpleNode[] = [
             { id: "A", location: { x: 0, y: 0 } },
             { id: "B", location: { x: 1, y: 0 } },
@@ -587,11 +619,56 @@ describe("getShortestPath()", () => {
                 { edge: graph.getEdge("longEdge"), isForward: false },
             ],
             nodes: [graph.getNode("A"), graph.getNode("B")],
+            locations: [
+                { x: 0, y: 0.25 },
+                { x: 0, y: 0 },
+                { x: 1, y: 0 },
+                { x: 1, y: 0.25 },
+            ],
             length: 1.5,
         };
         const path = graph.getShortestPath(start, end);
         expect(path).toEqual(expectedPath);
-        const endTime = Date.now();
+    });
+
+    it("should return a single-point path if start and end are the same", () => {
+        const graph = TestGraphs.getTwoNodes();
+        const start: EdgePoint = { edgeId: "AB", distance: 0.5 };
+        const expectedPath: Path = {
+            start,
+            end: start,
+            orientedEdges: [{ edge: graph.getEdge("AB"), isForward: true }],
+            nodes: [],
+            locations: [{ x: 0.5, y: 0 }],
+            length: 0,
+        };
+        const path = graph.getShortestPath(start, start);
+        expect(path).toEqual(expectedPath);
+    });
+});
+
+describe("advanceAlongLocations()", () => {
+    const locations: Location[] = [{ x: 0, y: 0 }, { x: 1, y: 0 }, { x: 1, y: 1 }];
+
+    it("should return same locations if distance is zero", () => {
+        const newLocations = Graph.advanceAlongLocations(locations, 0);
+        expect(newLocations).toEqual(locations);
+    });
+
+    it("should advance along locations, dropping passed points", () => {
+        const newLocations = Graph.advanceAlongLocations(locations, 1.5);
+        const expected: Location[] = [{ x: 1, y: 0.5 }, { x: 1, y: 1 }];
+        expect(newLocations).toEqual(expected);
+    });
+
+    it("should return just the endpoint if distance greater than total length", () => {
+        const newLocations = Graph.advanceAlongLocations(locations, 4);
+        const expected: Location[] = [{ x: 1, y: 1 }];
+        expect(newLocations).toEqual(expected);
+    });
+
+    it("should throw on negative distance", () => {
+        expect(() => Graph.advanceAlongLocations(locations, -1)).toThrowError(/negative/);
     });
 });
 
@@ -606,36 +683,51 @@ describe("advancePath()", () => {
             { edge: graph.getEdge("CD"), isForward: true },
         ],
         nodes: [graph.getNode("B"), graph.getNode("C")],
+        locations: [
+            { x: 0.5, y: 0 },
+            { x: 1, y: 0 },
+            { x: 2, y: 0 },
+            { x: 2.5, y: 0 },
+        ],
         length: 2,
     };
 
     it("should return the same path if distance is zero", () => {
-        const advanced = graph.advancePath(path, 0);
+        const advanced = graph.advanceAlongPath(path, 0);
         expect(advanced).toEqual(path);
     });
 
     it("should advance path, dropping nodes and edges", () => {
-        const advanced = graph.advancePath(path, 1.75);
+        const advanced = graph.advanceAlongPath(path, 1.75);
         const expected: Path = {
             start: { edgeId: "CD", distance: 0.25 },
             end: { edgeId: "CD", distance: 0.5 },
             orientedEdges: [{ edge: graph.getEdge("CD"), isForward: true }],
             nodes: [],
+            locations: [
+                { x: 2.25, y: 0 },
+                { x: 2.5, y: 0 },
+            ],
             length: 0.25,
         };
         expect(advanced).toEqual(expected);
     });
 
     it("should return a single-point path if distance is greater than length", () => {
-        const advanced = graph.advancePath(path, 3);
+        const advanced = graph.advanceAlongPath(path, 3);
         const expected: Path = {
             start: { edgeId: "CD", distance: 0.5 },
             end: { edgeId: "CD", distance: 0.5 },
             orientedEdges: [{ edge: graph.getEdge("CD"), isForward: true }],
             nodes: [],
+            locations: [{ x: 2.5, y: 0 }],
             length: 0,
         };
         expect(advanced).toEqual(expected);
+    });
+
+    it("should throw on negative distance", () => {
+        expect(() => graph.advanceAlongPath(path, -1)).toThrowError(/negative/);
     });
 });
 
@@ -676,18 +768,18 @@ describe("getClosestPoint()", () => {
 
     it("should work for edge with inner locations", () => {
         const nodes: SimpleNode[] = [
-            {id: "A", location: {x: 0, y: 0}},
-            {id: "B", location: {x: 1, y: 0}},
+            { id: "A", location: { x: 0, y: 0 } },
+            { id: "B", location: { x: 1, y: 0 } },
         ];
         const edges: SimpleEdge[] = [{
             id: "AB",
             startNodeId: "A",
             endNodeId: "B",
-            innerLocations: [{x: 0, y: 1}, {x: 1, y: 1}],
+            innerLocations: [{ x: 0, y: 1 }, { x: 1, y: 1 }],
         }];
         const graph = Graph.create(nodes, edges).withClosestPointMesh(0.25);
         const closestPoint = graph.getClosestPoint({ x: 0.25, y: 2 });
-        const expected = {edgeId: "AB", distance: 1.25};
+        const expected = { edgeId: "AB", distance: 1.25 };
         expect(closestPoint).toEqual(expected);
     });
 });
