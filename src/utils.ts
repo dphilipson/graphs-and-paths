@@ -1,5 +1,10 @@
+/**
+ * Collection of helper methods. These are not exported, and all functions in this file should be
+ * marked @hidden.
+ */
 import { Location, OrientedEdge } from "./types";
 
+/** @hidden */
 export function last<T>(ts: T[]): T {
     if (ts.length === 0) {
         throw new Error("Cannot take last element of empty array");
@@ -13,6 +18,8 @@ export function last<T>(ts: T[]): T {
  * returned array is the distance from the start of the path to its ith location. In particular,
  * this means the first element of the returned array is 0 and the last element is the total length
  * of the path.
+ * 
+ * @hidden
  */
 export function getCumulativeDistances(path: Location[]): number[] {
     if (path.length === 0) {
@@ -31,6 +38,8 @@ export function getCumulativeDistances(path: Location[]): number[] {
 /**
  * Assuming xs is sorted, returns the index of the largest element of xs which is at most x. If all
  * elements xs are larger than x, then return -1.
+ * 
+ * @hidden
  */
 export function findFloorIndex(xs: number[], x: number): number {
     // Min-max are inclusive-exclusive.
@@ -50,6 +59,7 @@ export function findFloorIndex(xs: number[], x: number): number {
     return minIndex;
 }
 
+/** @hidden */
 export function getIntermediateLocation(start: Location, end: Location, distance: number): Location {
     const length = distanceBetween(start, end);
     const t = clamp(distance / length, 0, 1);
@@ -63,12 +73,14 @@ function clamp(x: number, min: number, max: number): number {
     return Math.max(min, Math.min(max, x));
 }
 
+/** @hidden */
 export function distanceBetween(location1: Location, location2: Location): number {
     const dx = location2.x - location1.x;
     const dy = location2.y - location1.y;
     return Math.sqrt(dx * dx + dy * dy);
 }
 
+/** @hidden */
 export function compareIds(id1: number | string, id2: number | string) {
     // Numbers before strings, then natural order.
     if (typeof id1 === typeof id2) {
@@ -86,16 +98,19 @@ export function compareIds(id1: number | string, id2: number | string) {
     }
 }
 
+/** @hidden */
 export function reversePath(edges: OrientedEdge[]): OrientedEdge[] {
     return edges
         .map(({edge, isForward}) => ({ edge, isForward: !isForward }))
         .reverse();
 }
 
+/** @hidden */
 export function flatMap<T, U>(array: T[], f: (t: T) => U[]): U[] {
     return array.reduce((result: U[], t) => pushAll(result, f(t)), []);
 }
 
+/** @hidden */
 export function min<T>(array: T[], comparator: (t1: T, t2: T) => number): T {
     if (array.length === 0) {
         throw new Error("Cannot take minimum of empty array");
@@ -105,6 +120,8 @@ export function min<T>(array: T[], comparator: (t1: T, t2: T) => number): T {
 
 /**
  * Returns information about the closest point on segment ab to point p.
+ * 
+ * @hidden
  */
 export function closestPointOnSegment(
     p: Location,
@@ -128,10 +145,12 @@ export function closestPointOnSegment(
     return { distanceDownSegment, distanceFromLocation };
 }
 
+/** @hidden */
 export function areLocationsEqual(location1: Location, location2: Location): boolean {
     return location1.x === location2.x && location1.y === location2.y;
 }
 
+/** @hidden */
 export function dedupeLocations(locations: Location[]): Location[] {
     return dedupe(locations, areLocationsEqual);
 }
@@ -149,6 +168,7 @@ function dedupe<T>(
     return result;
 }
 
+/** @hidden */
 export function pushAll<T>(array: T[], toAdd: T[]): T[] {
     toAdd.forEach((t) => array.push(t));
     return array;

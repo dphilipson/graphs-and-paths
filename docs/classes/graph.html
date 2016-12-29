@@ -1,0 +1,943 @@
+<!doctype html>
+<html class="default no-js">
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title>Graph | Graphs and Paths</title>
+	<meta name="description" content="">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" href="../assets/css/main.css">
+	<script src="../assets/js/modernizr.js"></script>
+</head>
+<body>
+<header>
+	<div class="tsd-page-toolbar">
+		<div class="container">
+			<div class="table-wrap">
+				<div class="table-cell" id="tsd-search" data-index="../assets/js/search.js" data-base="..">
+					<div class="field">
+						<label for="tsd-search-field" class="tsd-widget search no-caption">Search</label>
+						<input id="tsd-search-field" type="text" />
+					</div>
+					<ul class="results">
+						<li class="state loading">Preparing search index...</li>
+						<li class="state failure">The search index is not available</li>
+					</ul>
+					<a href="../index.html" class="title">Graphs and Paths</a>
+				</div>
+				<div class="table-cell" id="tsd-widgets">
+					<div id="tsd-filter">
+						<a href="#" class="tsd-widget options no-caption" data-toggle="options">Options</a>
+						<div class="tsd-filter-group">
+							<div class="tsd-select" id="tsd-filter-visibility">
+								<span class="tsd-select-label">All</span>
+								<ul class="tsd-select-list">
+									<li data-value="public">Public</li>
+									<li data-value="protected">Public/Protected</li>
+									<li data-value="private" class="selected">All</li>
+								</ul>
+							</div>
+							<input type="checkbox" id="tsd-filter-inherited" checked />
+							<label class="tsd-widget" for="tsd-filter-inherited">Inherited</label>
+							<input type="checkbox" id="tsd-filter-externals" checked />
+							<label class="tsd-widget" for="tsd-filter-externals">Externals</label>
+							<input type="checkbox" id="tsd-filter-only-exported" />
+							<label class="tsd-widget" for="tsd-filter-only-exported">Only exported</label>
+						</div>
+					</div>
+					<a href="#" class="tsd-widget menu no-caption" data-toggle="menu">Menu</a>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="tsd-page-title">
+		<div class="container">
+			<ul class="tsd-breadcrumb">
+				<li>
+					<a href="../index.html">Globals</a>
+				</li>
+				<li>
+					<a href="graph.html">Graph</a>
+				</li>
+			</ul>
+			<h1>Class Graph</h1>
+		</div>
+	</div>
+</header>
+<div class="container container-main">
+	<div class="row">
+		<div class="col-8 col-content">
+			<section class="tsd-panel tsd-comment">
+				<div class="tsd-comment tsd-typography">
+					<div class="lead">
+						<p>A graph composed of <a href="../interfaces/node.html">Node</a>s and <a href="../interfaces/edge.html">Edge</a>s, representing 2-D spatial points and links between
+						them. Provides methods for reading and analyzing its data.</p>
+					</div>
+					<p>The graph and all its data are immutable. No method will modify the <code>Graph</code> instance on which it
+					is called, although some will return new instances.</p>
+					<p>New <code>Graph</code> instances are created using <a href="graph.html#create">Graph.create</a>, which takes <a href="../interfaces/simplenode.html">SimpleNode</a>s and
+						<a href="../interfaces/simpleedge.html">SimpleEdge</a>s as arguments. Upon construction, the graph creates corresponding <a href="../interfaces/node.html">Node</a> and
+						<a href="../interfaces/edge.html">Edge</a> instances which contain additional information. All <code>Graph</code> methods will return these
+					<code>Node</code>s rather than the original <code>SimpleNode</code>s, and likewise for edges.</p>
+					<p>Example usage:</p>
+					<pre><code class="lang-javascript"><span class="hljs-keyword">import</span> Graph <span class="hljs-keyword">from</span> <span class="hljs-string">"graphs-and-paths"</span>;
+
+<span class="hljs-keyword">const</span> nodes = [
+    { <span class="hljs-attr">id</span>: <span class="hljs-string">"A"</span>, <span class="hljs-attr">location</span>: { <span class="hljs-attr">x</span>: <span class="hljs-number">0</span>, <span class="hljs-attr">y</span>: <span class="hljs-number">0</span> } },
+    { <span class="hljs-attr">id</span>: <span class="hljs-string">"B"</span>, <span class="hljs-attr">location</span>: { <span class="hljs-attr">x</span>: <span class="hljs-number">3</span>, <span class="hljs-attr">y</span>: <span class="hljs-number">0</span> } },
+    { <span class="hljs-attr">id</span>: <span class="hljs-string">"C"</span>, <span class="hljs-attr">location</span>: { <span class="hljs-attr">x</span>: <span class="hljs-number">0</span>, <span class="hljs-attr">y</span>: <span class="hljs-number">4</span> } }
+];
+<span class="hljs-keyword">const</span> edges = [
+    { <span class="hljs-attr">id</span>: <span class="hljs-string">"AB"</span>, <span class="hljs-attr">startNodeId</span>: <span class="hljs-string">"A"</span>, <span class="hljs-attr">endNodeId</span>: <span class="hljs-string">"B"</span> },
+    { <span class="hljs-attr">id</span>: <span class="hljs-string">"BC"</span>, <span class="hljs-attr">startNodeId</span>: <span class="hljs-string">"B"</span>, <span class="hljs-attr">endNodeId</span>: <span class="hljs-string">"C"</span> },
+    { <span class="hljs-attr">id</span>: <span class="hljs-string">"CA"</span>, <span class="hljs-attr">startNodeId</span>: <span class="hljs-string">"C"</span>, <span class="hljs-attr">endNodeId</span>: <span class="hljs-string">"A"</span> }
+];
+<span class="hljs-keyword">const</span> graph = Graph.create(nodes, edges);
+
+graph.getNode(<span class="hljs-string">"A"</span>);
+<span class="hljs-comment">// { id: "A", location: { x: 0, y: 0 }, edgeIds: ["AB", "CA"] }</span>
+
+graph.getLocation(<span class="hljs-string">"AB"</span>, <span class="hljs-number">2</span>);
+<span class="hljs-comment">// { x: 2, y: 0 }</span>
+
+graph.getShortestPath(
+    { <span class="hljs-attr">edgeId</span>: <span class="hljs-string">"CA"</span>, <span class="hljs-attr">distance</span>: <span class="hljs-number">3</span> },
+    { <span class="hljs-attr">edgeId</span>: <span class="hljs-string">"BC"</span>, <span class="hljs-attr">distance</span>: <span class="hljs-number">1</span> }
+).locations;
+<span class="hljs-comment">// [</span>
+<span class="hljs-comment">//     { x: 0, y: 1 },</span>
+<span class="hljs-comment">//     { x: 0, y: 0 },</span>
+<span class="hljs-comment">//     { x: 3, y: 0 },</span>
+<span class="hljs-comment">//     { x: 2.4, y: 0.8 }</span>
+<span class="hljs-comment">// ]</span>
+</code></pre>
+				</div>
+			</section>
+			<section class="tsd-panel tsd-hierarchy">
+				<h3>Hierarchy</h3>
+				<ul class="tsd-hierarchy">
+					<li>
+						<span class="target">Graph</span>
+					</li>
+				</ul>
+			</section>
+			<section class="tsd-panel-group tsd-index-group">
+				<h2>Index</h2>
+				<section class="tsd-panel tsd-index-panel">
+					<div class="tsd-index-content">
+						<section class="tsd-index-section tsd-is-external">
+							<h3>Methods</h3>
+							<ul class="tsd-index-list">
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-external"><a href="graph.html#advancealongpath" class="tsd-kind-icon">advance<wbr>Along<wbr>Path</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-external"><a href="graph.html#coalesced" class="tsd-kind-icon">coalesced</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-external"><a href="graph.html#getalledges" class="tsd-kind-icon">get<wbr>All<wbr>Edges</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-external"><a href="graph.html#getallnodes" class="tsd-kind-icon">get<wbr>All<wbr>Nodes</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-external"><a href="graph.html#getclosestpoint" class="tsd-kind-icon">get<wbr>Closest<wbr>Point</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-external"><a href="graph.html#getconnectedcomponentofnode" class="tsd-kind-icon">get<wbr>Connected<wbr>Component<wbr>OfNode</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-external"><a href="graph.html#getconnectedcomponents" class="tsd-kind-icon">get<wbr>Connected<wbr>Components</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-external"><a href="graph.html#getedge" class="tsd-kind-icon">get<wbr>Edge</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-external"><a href="graph.html#getedgesofnode" class="tsd-kind-icon">get<wbr>Edges<wbr>OfNode</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-external"><a href="graph.html#getendpointsofedge" class="tsd-kind-icon">get<wbr>Endpoints<wbr>OfEdge</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-external"><a href="graph.html#getlocation" class="tsd-kind-icon">get<wbr>Location</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-external"><a href="graph.html#getneighbors" class="tsd-kind-icon">get<wbr>Neighbors</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-external"><a href="graph.html#getnode" class="tsd-kind-icon">get<wbr>Node</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-external"><a href="graph.html#getotherendpoint" class="tsd-kind-icon">get<wbr>Other<wbr>Endpoint</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-external"><a href="graph.html#getshortestpath" class="tsd-kind-icon">get<wbr>Shortest<wbr>Path</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-external"><a href="graph.html#withclosestpointmesh" class="tsd-kind-icon">with<wbr>Closest<wbr>Point<wbr>Mesh</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-static tsd-is-external"><a href="graph.html#advancealonglocations" class="tsd-kind-icon">advance<wbr>Along<wbr>Locations</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-static tsd-is-external"><a href="graph.html#create" class="tsd-kind-icon">create</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-static tsd-is-external"><a href="graph.html#distance" class="tsd-kind-icon">distance</a></li>
+							</ul>
+						</section>
+					</div>
+				</section>
+			</section>
+			<section class="tsd-panel-group tsd-member-group tsd-is-external">
+				<h2>Methods</h2>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-external">
+					<a name="advancealongpath" class="tsd-anchor"></a>
+					<h3>advance<wbr>Along<wbr>Path</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-external">
+						<li class="tsd-signature tsd-kind-icon">advance<wbr>Along<wbr>Path<span class="tsd-signature-symbol">(</span>path<span class="tsd-signature-symbol">: </span><a href="../interfaces/path.html" class="tsd-signature-type">Path</a>, distance<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../interfaces/path.html" class="tsd-signature-type">Path</a></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/dphilipson/graphs-and-paths/blob/13f77b0/src/graph.ts#L445">graph.ts:445</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Returns a new path obtained by truncating the given path by the provided distance. That is,
+										the start point of the path moves forward, and any nodes and edges that it passes are
+									dropped. Throws an error if distance is negative.</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>path: <a href="../interfaces/path.html" class="tsd-signature-type">Path</a></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>A path.</p>
+									</div>
+								</li>
+								<li>
+									<h5>distance: <span class="tsd-signature-type">number</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>A distance to travel along the path.</p>
+									</div>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <a href="../interfaces/path.html" class="tsd-signature-type">Path</a></h4>
+							<p>The remaining portion of <code>path</code> after traveling <code>distance</code> along it.</p>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-external">
+					<a name="coalesced" class="tsd-anchor"></a>
+					<h3>coalesced</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-external">
+						<li class="tsd-signature tsd-kind-icon">coalesced<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="graph.html" class="tsd-signature-type">Graph</a></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/dphilipson/graphs-and-paths/blob/13f77b0/src/graph.ts#L283">graph.ts:283</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Creates a new <code>Graph</code> instance with the same shape but with a reduced number of nodes and
+										edges. Each instance of multiple nodes and edges in a chain with no forks is converted into a
+										single edge, where the removed nodes are converted into inner locations of the new edge. In
+										particular, the new graph will have no nodes of degree 2. This may significantly increase
+									the speed of certain calculations, such as <a href="graph.html#getshortestpath">getShortestPath</a>.</p>
+								</div>
+								<p>A newly created edge will have the lowest ID of the edges which were combined to form it,
+								where numbers are considered lower than strings.</p>
+							</div>
+							<h4 class="tsd-returns-title">Returns <a href="graph.html" class="tsd-signature-type">Graph</a></h4>
+							<p>A new coalesced <code>Graph</code> instance.</p>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-external">
+					<a name="getalledges" class="tsd-anchor"></a>
+					<h3>get<wbr>All<wbr>Edges</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-external">
+						<li class="tsd-signature tsd-kind-icon">get<wbr>All<wbr>Edges<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../interfaces/edge.html" class="tsd-signature-type">Edge</a><span class="tsd-signature-symbol">[]</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/dphilipson/graphs-and-paths/blob/13f77b0/src/graph.ts#L184">graph.ts:184</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+							</div>
+							<h4 class="tsd-returns-title">Returns <a href="../interfaces/edge.html" class="tsd-signature-type">Edge</a><span class="tsd-signature-symbol">[]</span></h4>
+							<p>All the edges present in this graph, in the order that they were originally provided
+							to <a href="graph.html#create">Graph.create</a>.</p>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-external">
+					<a name="getallnodes" class="tsd-anchor"></a>
+					<h3>get<wbr>All<wbr>Nodes</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-external">
+						<li class="tsd-signature tsd-kind-icon">get<wbr>All<wbr>Nodes<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../interfaces/node.html" class="tsd-signature-type">Node</a><span class="tsd-signature-symbol">[]</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/dphilipson/graphs-and-paths/blob/13f77b0/src/graph.ts#L176">graph.ts:176</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+							</div>
+							<h4 class="tsd-returns-title">Returns <a href="../interfaces/node.html" class="tsd-signature-type">Node</a><span class="tsd-signature-symbol">[]</span></h4>
+							<p>All the nodes present in this graph, in the order that they were originally provided
+							to <a href="graph.html#create">Graph.create</a>.</p>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-external">
+					<a name="getclosestpoint" class="tsd-anchor"></a>
+					<h3>get<wbr>Closest<wbr>Point</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-external">
+						<li class="tsd-signature tsd-kind-icon">get<wbr>Closest<wbr>Point<span class="tsd-signature-symbol">(</span>location<span class="tsd-signature-symbol">: </span><a href="../interfaces/location.html" class="tsd-signature-type">Location</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../interfaces/edgepoint.html" class="tsd-signature-type">EdgePoint</a></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/dphilipson/graphs-and-paths/blob/13f77b0/src/graph.ts#L534">graph.ts:534</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Returns the closest point on the graph to a given location. This requires the graph to have
+										a spatial index. To enable this, first use <a href="graph.html#withclosestpointmesh">withClosestPointMesh</a> to obtain a new graph
+									instance with an index enabled. Calling this method on a graph with no index will throw.</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>location: <a href="../interfaces/location.html" class="tsd-signature-type">Location</a></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>A location.</p>
+									</div>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <a href="../interfaces/edgepoint.html" class="tsd-signature-type">EdgePoint</a></h4>
+							<p>The point on the graph closest to the given location, up to a precision determined
+							by the graph&#39;s mesh.</p>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-external">
+					<a name="getconnectedcomponentofnode" class="tsd-anchor"></a>
+					<h3>get<wbr>Connected<wbr>Component<wbr>OfNode</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-external">
+						<li class="tsd-signature tsd-kind-icon">get<wbr>Connected<wbr>Component<wbr>OfNode<span class="tsd-signature-symbol">(</span>nodeId<span class="tsd-signature-symbol">: </span><a href="../index.html#nodeid" class="tsd-signature-type">NodeId</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="graph.html" class="tsd-signature-type">Graph</a></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/dphilipson/graphs-and-paths/blob/13f77b0/src/graph.ts#L345">graph.ts:345</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>nodeId: <a href="../index.html#nodeid" class="tsd-signature-type">NodeId</a></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>A node ID.</p>
+									</div>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <a href="graph.html" class="tsd-signature-type">Graph</a></h4>
+							<p>A new <code>Graph</code> instance representing the connected component containing the node with
+							the given ID.</p>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-external">
+					<a name="getconnectedcomponents" class="tsd-anchor"></a>
+					<h3>get<wbr>Connected<wbr>Components</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-external">
+						<li class="tsd-signature tsd-kind-icon">get<wbr>Connected<wbr>Components<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="graph.html" class="tsd-signature-type">Graph</a><span class="tsd-signature-symbol">[]</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/dphilipson/graphs-and-paths/blob/13f77b0/src/graph.ts#L327">graph.ts:327</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+							</div>
+							<h4 class="tsd-returns-title">Returns <a href="graph.html" class="tsd-signature-type">Graph</a><span class="tsd-signature-symbol">[]</span></h4>
+							<p>A list of new <code>Graph</code> instances, each representing a single connected component of
+							this instance.</p>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-external">
+					<a name="getedge" class="tsd-anchor"></a>
+					<h3>get<wbr>Edge</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-external">
+						<li class="tsd-signature tsd-kind-icon">get<wbr>Edge<span class="tsd-signature-symbol">(</span>edgeId<span class="tsd-signature-symbol">: </span><a href="../index.html#edgeid" class="tsd-signature-type">EdgeId</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../interfaces/edge.html" class="tsd-signature-type">Edge</a></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/dphilipson/graphs-and-paths/blob/13f77b0/src/graph.ts#L204">graph.ts:204</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>edgeId: <a href="../index.html#edgeid" class="tsd-signature-type">EdgeId</a></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>An edge ID.</p>
+									</div>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <a href="../interfaces/edge.html" class="tsd-signature-type">Edge</a></h4>
+							<p>The <code>Edge</code> associated with the given ID, or <code>undefined</code> if none exists. Note that
+								the type signature is a lie (it does not claim to be nullable), but this is
+							consistent with other lookup methods such as keyed-indexing.</p>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-external">
+					<a name="getedgesofnode" class="tsd-anchor"></a>
+					<h3>get<wbr>Edges<wbr>OfNode</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-external">
+						<li class="tsd-signature tsd-kind-icon">get<wbr>Edges<wbr>OfNode<span class="tsd-signature-symbol">(</span>nodeId<span class="tsd-signature-symbol">: </span><a href="../index.html#nodeid" class="tsd-signature-type">NodeId</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../interfaces/edge.html" class="tsd-signature-type">Edge</a><span class="tsd-signature-symbol">[]</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/dphilipson/graphs-and-paths/blob/13f77b0/src/graph.ts#L212">graph.ts:212</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>nodeId: <a href="../index.html#nodeid" class="tsd-signature-type">NodeId</a></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>A node ID.</p>
+									</div>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <a href="../interfaces/edge.html" class="tsd-signature-type">Edge</a><span class="tsd-signature-symbol">[]</span></h4>
+							<p>All edges which have the node with the given ID as an endpoint.</p>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-external">
+					<a name="getendpointsofedge" class="tsd-anchor"></a>
+					<h3>get<wbr>Endpoints<wbr>OfEdge</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-external">
+						<li class="tsd-signature tsd-kind-icon">get<wbr>Endpoints<wbr>OfEdge<span class="tsd-signature-symbol">(</span>edgeId<span class="tsd-signature-symbol">: </span><a href="../index.html#edgeid" class="tsd-signature-type">EdgeId</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-symbol">[</span><a href="../interfaces/node.html" class="tsd-signature-type">Node</a><span class="tsd-signature-symbol">, </span><a href="../interfaces/node.html" class="tsd-signature-type">Node</a><span class="tsd-signature-symbol">]</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/dphilipson/graphs-and-paths/blob/13f77b0/src/graph.ts#L220">graph.ts:220</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>edgeId: <a href="../index.html#edgeid" class="tsd-signature-type">EdgeId</a></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>An edge ID.</p>
+									</div>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-symbol">[</span><a href="../interfaces/node.html" class="tsd-signature-type">Node</a><span class="tsd-signature-symbol">, </span><a href="../interfaces/node.html" class="tsd-signature-type">Node</a><span class="tsd-signature-symbol">]</span></h4>
+							<p>The two nodes which are endpoints of the edge with the given ID.</p>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-external">
+					<a name="getlocation" class="tsd-anchor"></a>
+					<h3>get<wbr>Location</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-external">
+						<li class="tsd-signature tsd-kind-icon">get<wbr>Location<span class="tsd-signature-symbol">(</span>edgePoint<span class="tsd-signature-symbol">: </span><a href="../interfaces/edgepoint.html" class="tsd-signature-type">EdgePoint</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../interfaces/location.html" class="tsd-signature-type">Location</a></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/dphilipson/graphs-and-paths/blob/13f77b0/src/graph.ts#L257">graph.ts:257</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>edgePoint: <a href="../interfaces/edgepoint.html" class="tsd-signature-type">EdgePoint</a></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>A point specified as a certain distance along an edge.</p>
+									</div>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <a href="../interfaces/location.html" class="tsd-signature-type">Location</a></h4>
+							<p>The Cartesian coordinates of the given point.</p>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-external">
+					<a name="getneighbors" class="tsd-anchor"></a>
+					<h3>get<wbr>Neighbors</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-external">
+						<li class="tsd-signature tsd-kind-icon">get<wbr>Neighbors<span class="tsd-signature-symbol">(</span>nodeId<span class="tsd-signature-symbol">: </span><a href="../index.html#nodeid" class="tsd-signature-type">NodeId</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../interfaces/node.html" class="tsd-signature-type">Node</a><span class="tsd-signature-symbol">[]</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/dphilipson/graphs-and-paths/blob/13f77b0/src/graph.ts#L248">graph.ts:248</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>nodeId: <a href="../index.html#nodeid" class="tsd-signature-type">NodeId</a></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>A node ID.</p>
+									</div>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <a href="../interfaces/node.html" class="tsd-signature-type">Node</a><span class="tsd-signature-symbol">[]</span></h4>
+							<p>All nodes which are connected to the node with the given ID by an edge.</p>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-external">
+					<a name="getnode" class="tsd-anchor"></a>
+					<h3>get<wbr>Node</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-external">
+						<li class="tsd-signature tsd-kind-icon">get<wbr>Node<span class="tsd-signature-symbol">(</span>nodeId<span class="tsd-signature-symbol">: </span><a href="../index.html#nodeid" class="tsd-signature-type">NodeId</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../interfaces/node.html" class="tsd-signature-type">Node</a></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/dphilipson/graphs-and-paths/blob/13f77b0/src/graph.ts#L194">graph.ts:194</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>nodeId: <a href="../index.html#nodeid" class="tsd-signature-type">NodeId</a></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>A node ID.</p>
+									</div>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <a href="../interfaces/node.html" class="tsd-signature-type">Node</a></h4>
+							<p>The <code>Node</code> associated with the given ID, or <code>undefined</code> if none exists. Note that
+								the type signature is a lie (it does not claim to be nullable), but this is
+							consistent with other lookup methods such as keyed-indexing.</p>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-external">
+					<a name="getotherendpoint" class="tsd-anchor"></a>
+					<h3>get<wbr>Other<wbr>Endpoint</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-external">
+						<li class="tsd-signature tsd-kind-icon">get<wbr>Other<wbr>Endpoint<span class="tsd-signature-symbol">(</span>edgeId<span class="tsd-signature-symbol">: </span><a href="../index.html#edgeid" class="tsd-signature-type">EdgeId</a>, nodeId<span class="tsd-signature-symbol">: </span><a href="../index.html#nodeid" class="tsd-signature-type">NodeId</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../interfaces/node.html" class="tsd-signature-type">Node</a></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/dphilipson/graphs-and-paths/blob/13f77b0/src/graph.ts#L233">graph.ts:233</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Given an edge and one of its endpoints, return the other endpoint. Throws if either of the
+									IDs is nonexistent, or if the node is not an endpoint of the edge.</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>edgeId: <a href="../index.html#edgeid" class="tsd-signature-type">EdgeId</a></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>An edge ID.</p>
+									</div>
+								</li>
+								<li>
+									<h5>nodeId: <a href="../index.html#nodeid" class="tsd-signature-type">NodeId</a></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>A node ID, referencing one of the endpoints of the edge.</p>
+									</div>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <a href="../interfaces/node.html" class="tsd-signature-type">Node</a></h4>
+							<p>The node which is the other endpoint of the edge with the given ID.</p>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-external">
+					<a name="getshortestpath" class="tsd-anchor"></a>
+					<h3>get<wbr>Shortest<wbr>Path</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-external">
+						<li class="tsd-signature tsd-kind-icon">get<wbr>Shortest<wbr>Path<span class="tsd-signature-symbol">(</span>start<span class="tsd-signature-symbol">: </span><a href="../interfaces/edgepoint.html" class="tsd-signature-type">EdgePoint</a>, end<span class="tsd-signature-symbol">: </span><a href="../interfaces/edgepoint.html" class="tsd-signature-type">EdgePoint</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../interfaces/path.html" class="tsd-signature-type">Path</a></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/dphilipson/graphs-and-paths/blob/13f77b0/src/graph.ts#L373">graph.ts:373</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Returns the shortest path between two points on the graph. Throws if no such path exists.</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>start: <a href="../interfaces/edgepoint.html" class="tsd-signature-type">EdgePoint</a></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>A point along the graph.</p>
+									</div>
+								</li>
+								<li>
+									<h5>end: <a href="../interfaces/edgepoint.html" class="tsd-signature-type">EdgePoint</a></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>Another point along the graph.</p>
+									</div>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <a href="../interfaces/path.html" class="tsd-signature-type">Path</a></h4>
+							<p>The shortest path from the first point to the second.</p>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-external">
+					<a name="withclosestpointmesh" class="tsd-anchor"></a>
+					<h3>with<wbr>Closest<wbr>Point<wbr>Mesh</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-external">
+						<li class="tsd-signature tsd-kind-icon">with<wbr>Closest<wbr>Point<wbr>Mesh<span class="tsd-signature-symbol">(</span>precision<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="graph.html" class="tsd-signature-type">Graph</a></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/dphilipson/graphs-and-paths/blob/13f77b0/src/graph.ts#L498">graph.ts:498</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Does preprocessing to enable <a href="graph.html#getclosestpoint">getClosestPoint</a> by creating a spatial index for mesh of
+									points along the graph.</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>precision: <span class="tsd-signature-type">number</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>How fine the mesh should be. Lower precision is more accurate but takes
+											more time to precompute and more memory. As a rule-of-thumb, <a href="graph.html#getclosestpoint">getClosestPoint</a> will
+										be accurate to within <code>precision</code> distance.</p>
+									</div>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <a href="graph.html" class="tsd-signature-type">Graph</a></h4>
+							<p>A new <code>Graph</code> instance with a spatial index enabled.</p>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-static tsd-is-external">
+					<a name="advancealonglocations" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagStatic">Static</span> advance<wbr>Along<wbr>Locations</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-static tsd-is-external">
+						<li class="tsd-signature tsd-kind-icon">advance<wbr>Along<wbr>Locations<span class="tsd-signature-symbol">(</span>locations<span class="tsd-signature-symbol">: </span><a href="../interfaces/location.html" class="tsd-signature-type">Location</a><span class="tsd-signature-symbol">[]</span>, distance<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../interfaces/location.html" class="tsd-signature-type">Location</a><span class="tsd-signature-symbol">[]</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/dphilipson/graphs-and-paths/blob/13f77b0/src/graph.ts#L143">graph.ts:143</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Helper function for computing progress down a path after advancing along it for a given
+										distance. If the distance is greater than the total length of the path, then advances to
+									the end of the path. Throws on negative distances.</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>locations: <a href="../interfaces/location.html" class="tsd-signature-type">Location</a><span class="tsd-signature-symbol">[]</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>A list of locations representing a path.</p>
+									</div>
+								</li>
+								<li>
+									<h5>distance: <span class="tsd-signature-type">number</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>A distance down the path.</p>
+									</div>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <a href="../interfaces/location.html" class="tsd-signature-type">Location</a><span class="tsd-signature-symbol">[]</span></h4>
+							<p>A new list of locations representing the remaining part of <code>locations</code> after
+							advancing <code>distance</code> along the path.</p>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-static tsd-is-external">
+					<a name="create" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagStatic">Static</span> create</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-static tsd-is-external">
+						<li class="tsd-signature tsd-kind-icon">create<span class="tsd-signature-symbol">(</span>nodes<span class="tsd-signature-symbol">: </span><a href="../interfaces/simplenode.html" class="tsd-signature-type">SimpleNode</a><span class="tsd-signature-symbol">[]</span>, edges<span class="tsd-signature-symbol">: </span><a href="../interfaces/simpleedge.html" class="tsd-signature-type">SimpleEdge</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="graph.html" class="tsd-signature-type">Graph</a></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/dphilipson/graphs-and-paths/blob/13f77b0/src/graph.ts#L80">graph.ts:80</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>nodes: <a href="../interfaces/simplenode.html" class="tsd-signature-type">SimpleNode</a><span class="tsd-signature-symbol">[]</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>A list of nodes.</p>
+									</div>
+								</li>
+								<li>
+									<h5>edges: <a href="../interfaces/simpleedge.html" class="tsd-signature-type">SimpleEdge</a><span class="tsd-signature-symbol">[]</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>A list of edges.</p>
+									</div>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <a href="graph.html" class="tsd-signature-type">Graph</a></h4>
+							<p>A new <code>Graph</code> instance with the specified nodes and edges.</p>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-static tsd-is-external">
+					<a name="distance" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagStatic">Static</span> distance</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-static tsd-is-external">
+						<li class="tsd-signature tsd-kind-icon">distance<span class="tsd-signature-symbol">(</span>location1<span class="tsd-signature-symbol">: </span><a href="../interfaces/location.html" class="tsd-signature-type">Location</a>, location2<span class="tsd-signature-symbol">: </span><a href="../interfaces/location.html" class="tsd-signature-type">Location</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/dphilipson/graphs-and-paths/blob/13f77b0/src/graph.ts#L129">graph.ts:129</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>location1: <a href="../interfaces/location.html" class="tsd-signature-type">Location</a></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>A location.</p>
+									</div>
+								</li>
+								<li>
+									<h5>location2: <a href="../interfaces/location.html" class="tsd-signature-type">Location</a></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>Another location.</p>
+									</div>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">number</span></h4>
+							<p>The straight-line distance between <code>location1</code> and <code>location2</code>.</p>
+						</li>
+					</ul>
+				</section>
+			</section>
+		</div>
+		<div class="col-4 col-menu menu-sticky-wrap menu-highlight">
+			<nav class="tsd-navigation primary">
+				<ul>
+					<li class="globals  ">
+						<a href="../index.html"><em>Globals</em></a>
+					</li>
+				</ul>
+			</nav>
+			<nav class="tsd-navigation secondary menu-sticky">
+				<ul class="before-current">
+				</ul>
+				<ul class="current">
+					<li class="current tsd-kind-class tsd-is-external">
+						<a href="graph.html" class="tsd-kind-icon">Graph</a>
+						<ul>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-external">
+								<a href="graph.html#advancealongpath" class="tsd-kind-icon">advance<wbr>Along<wbr>Path</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-external">
+								<a href="graph.html#coalesced" class="tsd-kind-icon">coalesced</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-external">
+								<a href="graph.html#getalledges" class="tsd-kind-icon">get<wbr>All<wbr>Edges</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-external">
+								<a href="graph.html#getallnodes" class="tsd-kind-icon">get<wbr>All<wbr>Nodes</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-external">
+								<a href="graph.html#getclosestpoint" class="tsd-kind-icon">get<wbr>Closest<wbr>Point</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-external">
+								<a href="graph.html#getconnectedcomponentofnode" class="tsd-kind-icon">get<wbr>Connected<wbr>Component<wbr>OfNode</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-external">
+								<a href="graph.html#getconnectedcomponents" class="tsd-kind-icon">get<wbr>Connected<wbr>Components</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-external">
+								<a href="graph.html#getedge" class="tsd-kind-icon">get<wbr>Edge</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-external">
+								<a href="graph.html#getedgesofnode" class="tsd-kind-icon">get<wbr>Edges<wbr>OfNode</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-external">
+								<a href="graph.html#getendpointsofedge" class="tsd-kind-icon">get<wbr>Endpoints<wbr>OfEdge</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-external">
+								<a href="graph.html#getlocation" class="tsd-kind-icon">get<wbr>Location</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-external">
+								<a href="graph.html#getneighbors" class="tsd-kind-icon">get<wbr>Neighbors</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-external">
+								<a href="graph.html#getnode" class="tsd-kind-icon">get<wbr>Node</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-external">
+								<a href="graph.html#getotherendpoint" class="tsd-kind-icon">get<wbr>Other<wbr>Endpoint</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-external">
+								<a href="graph.html#getshortestpath" class="tsd-kind-icon">get<wbr>Shortest<wbr>Path</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-external">
+								<a href="graph.html#withclosestpointmesh" class="tsd-kind-icon">with<wbr>Closest<wbr>Point<wbr>Mesh</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-static tsd-is-external">
+								<a href="graph.html#advancealonglocations" class="tsd-kind-icon">advance<wbr>Along<wbr>Locations</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-static tsd-is-external">
+								<a href="graph.html#create" class="tsd-kind-icon">create</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-static tsd-is-external">
+								<a href="graph.html#distance" class="tsd-kind-icon">distance</a>
+							</li>
+						</ul>
+					</li>
+				</ul>
+				<ul class="after-current">
+					<li class=" tsd-kind-interface tsd-is-external">
+						<a href="../interfaces/edge.html" class="tsd-kind-icon">Edge</a>
+					</li>
+					<li class=" tsd-kind-interface tsd-is-external">
+						<a href="../interfaces/edgepoint.html" class="tsd-kind-icon">Edge<wbr>Point</a>
+					</li>
+					<li class=" tsd-kind-interface tsd-is-external">
+						<a href="../interfaces/location.html" class="tsd-kind-icon">Location</a>
+					</li>
+					<li class=" tsd-kind-interface tsd-is-external tsd-is-not-exported">
+						<a href="../interfaces/meshpoint.html" class="tsd-kind-icon">Mesh<wbr>Point</a>
+					</li>
+					<li class=" tsd-kind-interface tsd-is-external">
+						<a href="../interfaces/node.html" class="tsd-kind-icon">Node</a>
+					</li>
+					<li class=" tsd-kind-interface tsd-is-external">
+						<a href="../interfaces/orientededge.html" class="tsd-kind-icon">Oriented<wbr>Edge</a>
+					</li>
+					<li class=" tsd-kind-interface tsd-is-external">
+						<a href="../interfaces/path.html" class="tsd-kind-icon">Path</a>
+					</li>
+					<li class=" tsd-kind-interface tsd-is-external">
+						<a href="../interfaces/simpleedge.html" class="tsd-kind-icon">Simple<wbr>Edge</a>
+					</li>
+					<li class=" tsd-kind-interface tsd-is-external">
+						<a href="../interfaces/simplenode.html" class="tsd-kind-icon">Simple<wbr>Node</a>
+					</li>
+					<li class=" tsd-kind-type-alias tsd-is-external">
+						<a href="../index.html#edgeid" class="tsd-kind-icon">Edge<wbr>Id</a>
+					</li>
+					<li class=" tsd-kind-type-alias tsd-is-external">
+						<a href="../index.html#nodeid" class="tsd-kind-icon">Node<wbr>Id</a>
+					</li>
+					<li class=" tsd-kind-function tsd-is-external tsd-is-not-exported">
+						<a href="../index.html#clamp" class="tsd-kind-icon">clamp</a>
+					</li>
+					<li class=" tsd-kind-function tsd-has-type-parameter tsd-is-external tsd-is-not-exported">
+						<a href="../index.html#dedupe" class="tsd-kind-icon">dedupe</a>
+					</li>
+				</ul>
+			</nav>
+		</div>
+	</div>
+</div>
+<footer class="with-border-bottom">
+	<div class="container">
+		<h2>Legend</h2>
+		<div class="tsd-legend-group">
+			<ul class="tsd-legend">
+				<li class="tsd-kind-module"><span class="tsd-kind-icon">Module</span></li>
+				<li class="tsd-kind-object-literal"><span class="tsd-kind-icon">Object literal</span></li>
+				<li class="tsd-kind-variable"><span class="tsd-kind-icon">Variable</span></li>
+				<li class="tsd-kind-function"><span class="tsd-kind-icon">Function</span></li>
+				<li class="tsd-kind-function tsd-has-type-parameter"><span class="tsd-kind-icon">Function with type parameter</span></li>
+				<li class="tsd-kind-index-signature"><span class="tsd-kind-icon">Index signature</span></li>
+				<li class="tsd-kind-type-alias"><span class="tsd-kind-icon">Type alias</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-enum"><span class="tsd-kind-icon">Enumeration</span></li>
+				<li class="tsd-kind-enum-member"><span class="tsd-kind-icon">Enumeration member</span></li>
+				<li class="tsd-kind-property tsd-parent-kind-enum"><span class="tsd-kind-icon">Property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-enum"><span class="tsd-kind-icon">Method</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-interface"><span class="tsd-kind-icon">Interface</span></li>
+				<li class="tsd-kind-interface tsd-has-type-parameter"><span class="tsd-kind-icon">Interface with type parameter</span></li>
+				<li class="tsd-kind-constructor tsd-parent-kind-interface"><span class="tsd-kind-icon">Constructor</span></li>
+				<li class="tsd-kind-property tsd-parent-kind-interface"><span class="tsd-kind-icon">Property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-interface"><span class="tsd-kind-icon">Method</span></li>
+				<li class="tsd-kind-index-signature tsd-parent-kind-interface"><span class="tsd-kind-icon">Index signature</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-class"><span class="tsd-kind-icon">Class</span></li>
+				<li class="tsd-kind-class tsd-has-type-parameter"><span class="tsd-kind-icon">Class with type parameter</span></li>
+				<li class="tsd-kind-constructor tsd-parent-kind-class"><span class="tsd-kind-icon">Constructor</span></li>
+				<li class="tsd-kind-property tsd-parent-kind-class"><span class="tsd-kind-icon">Property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-class"><span class="tsd-kind-icon">Method</span></li>
+				<li class="tsd-kind-accessor tsd-parent-kind-class"><span class="tsd-kind-icon">Accessor</span></li>
+				<li class="tsd-kind-index-signature tsd-parent-kind-class"><span class="tsd-kind-icon">Index signature</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-constructor tsd-parent-kind-class tsd-is-inherited"><span class="tsd-kind-icon">Inherited constructor</span></li>
+				<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited"><span class="tsd-kind-icon">Inherited property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><span class="tsd-kind-icon">Inherited method</span></li>
+				<li class="tsd-kind-accessor tsd-parent-kind-class tsd-is-inherited"><span class="tsd-kind-icon">Inherited accessor</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-property tsd-parent-kind-class tsd-is-protected"><span class="tsd-kind-icon">Protected property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-class tsd-is-protected"><span class="tsd-kind-icon">Protected method</span></li>
+				<li class="tsd-kind-accessor tsd-parent-kind-class tsd-is-protected"><span class="tsd-kind-icon">Protected accessor</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><span class="tsd-kind-icon">Private property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-class tsd-is-private"><span class="tsd-kind-icon">Private method</span></li>
+				<li class="tsd-kind-accessor tsd-parent-kind-class tsd-is-private"><span class="tsd-kind-icon">Private accessor</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-property tsd-parent-kind-class tsd-is-static"><span class="tsd-kind-icon">Static property</span></li>
+				<li class="tsd-kind-call-signature tsd-parent-kind-class tsd-is-static"><span class="tsd-kind-icon">Static method</span></li>
+			</ul>
+		</div>
+	</div>
+</footer>
+<div class="container tsd-generator">
+	<p>Generated using <a href="http://typedoc.io" target="_blank">TypeDoc</a></p>
+</div>
+<div class="overlay"></div>
+<script src="../assets/js/main.js"></script>
+<script>if (location.protocol == 'file:') document.write('<script src="../assets/js/search.js"><' + '/script>');</script>
+</body>
+</html>

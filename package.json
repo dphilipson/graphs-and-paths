@@ -1,7 +1,7 @@
 {
   "name": "graphs-and-paths",
   "version": "0.1.4",
-  "description": "Tools for graphs representing physical locations.",
+  "description": "Tools for graphs representing 2-D spatial points and links between them.",
   "main": "dist/index.js",
   "types": "dist/index",
   "files": [
@@ -10,6 +10,7 @@
   "scripts": {
     "clean": "rm -rf dist",
     "build": "npm run clean && tsc",
+    "buildDocs": "typedoc --out docs --mode file --name 'Graphs and Paths' --readme none --module commonjs --target es5 --theme default --excludePrivate",
     "jest": "jest --config jest.json",
     "jest-watch": "npm run jest -- --watch",
     "lint": "tslint --project .",
@@ -42,6 +43,8 @@
     "@types/rbush": "^2.0.2",
     "jest": "^18.0.0",
     "tslint": "^4.1.1",
+    "typedoc": "^0.5.3",
+    "typedoc-default-themes": "0.4.0",
     "typescript": "^2.1.4"
   },
   "dependencies": {
