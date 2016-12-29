@@ -1,8 +1,12 @@
 # Graphs and Paths
 
-Tools for graphs representing 2-D spatial points and links between them. [View the demo here](https://dphilipson.github.io/graphs-and-paths-demo).
+Tools for graphs representing 2-D spatial points and links between them.
 
 [![Build Status](https://travis-ci.org/dphilipson/graphs-and-paths.svg?branch=develop)](https://travis-ci.org/dphilipson/graphs-and-paths)
+
+## Demo
+
+[View the demo](https://dphilipson.github.io/graphs-and-paths-demo).
 
 ## Installation
 
