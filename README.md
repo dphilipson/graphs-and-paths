@@ -1,6 +1,6 @@
 # Graphs and Paths
 
-Tools for graphs representing 2-D spatial points and links between them.
+Tools for graphs representing 2-D spatial points and links between them. [View the demo here](https://dphilipson.github.io/graphs-and-paths-demo).
 
 [![Build Status](https://travis-ci.org/dphilipson/graphs-and-paths.svg?branch=develop)](https://travis-ci.org/dphilipson/graphs-and-paths)
 
@@ -12,7 +12,7 @@ npm install --save graphs-and-paths
 
 ## API
 
-See [full documentation](https://dphilipson.github.io/graphs-and-paths).
+[View full documentation](https://dphilipson.github.io/graphs-and-paths).
 
 ## Sample Usage
 ``` javascript
@@ -47,8 +47,7 @@ graph.getShortestPath(
 //     { x: 2.4, y: 0.8 }
 // ]
 ```
-Many more methods are available. View
-[full documentation](https://dphilipson.github.io/graphs-and-paths)
-for details.
+Many more methods are available.
+[View full documentation](https://dphilipson.github.io/graphs-and-paths) for details.
 
 Copyright © 2016 David Philipson
