@@ -10,7 +10,7 @@
   "scripts": {
     "clean": "rm -rf dist",
     "build": "npm run clean && tsc",
-    "buildDocs": "typedoc --out docs --mode file --name 'Graphs and Paths' --readme none --module commonjs --target es5 --theme default --excludePrivate",
+    "buildDocs": "typedoc --out docs --mode file --name 'Graphs and Paths' --readme none --module commonjs --target es5 --theme minimal --excludePrivate",
     "jest": "jest --config jest.json",
     "jest-watch": "npm run jest -- --watch",
     "lint": "tslint --project .",

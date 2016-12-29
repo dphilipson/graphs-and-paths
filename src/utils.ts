@@ -69,6 +69,7 @@ export function getIntermediateLocation(start: Location, end: Location, distance
     };
 }
 
+/** @hidden */
 function clamp(x: number, min: number, max: number): number {
     return Math.max(min, Math.min(max, x));
 }
@@ -155,6 +156,7 @@ export function dedupeLocations(locations: Location[]): Location[] {
     return dedupe(locations, areLocationsEqual);
 }
 
+/** @hidden */
 function dedupe<T>(
     ts: T[],
     equals = ((t1: T, t2: T) => t1 === t2),
