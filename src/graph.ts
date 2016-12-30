@@ -251,6 +251,11 @@ export default class Graph {
     }
 
     /**
+     * Returns the Cartesian coordinates of the point a certain distance along an edge. Does not
+     * throw on out-of-bounds distances. Instead negative distances return the start of the edge
+     * and distances greater than the length return the end of the edge. This is to avoid unexpected
+     * behavior due to floating-point imprecision issues.
+     * 
      * @param edgePoint A point specified as a certain distance along an edge.
      * @return The Cartesian coordinates of the given point.
      */
@@ -272,8 +277,9 @@ export default class Graph {
      * Creates a new `Graph` instance with the same shape but with a reduced number of nodes and
      * edges. Each instance of multiple nodes and edges in a chain with no forks is converted into a
      * single edge, where the removed nodes are converted into inner locations of the new edge. In
-     * particular, the new graph will have no nodes of degree 2. This may significantly increase
-     * the speed of certain calculations, such as [[getShortestPath]].
+     * particular, the new graph will have no nodes of degree 2 except for nodes with only one edge
+     * connecting to themselves. This may significantly increase the speed of certain calculations,
+     * such as [[getShortestPath]].
      * 
      * A newly created edge will have the lowest ID of the edges which were combined to form it,
      * where numbers are considered lower than strings.
