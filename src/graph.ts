@@ -163,6 +163,67 @@ export default class Graph {
         }
     }
 
+    /**
+     * Removes zero-length segments at the start and end of the path caused by the ambiguity of
+     * representing a Node location with an EdgePoint.
+     */
+    public static canonicalizePath(path: Path): Path {
+        const { start, end, orientedEdges, nodes } = path;
+        if (start === end) {
+            return path;
+        }
+        const firstEdge = orientedEdges[0];
+        const lastEdge = Utils.last(orientedEdges);
+        const firstEdgeIsTrivial = (firstEdge.isForward && start.distance >= firstEdge.edge.length)
+            || (!firstEdge.isForward && start.distance <= 0);
+        const lastEdgeIsTrivial = (lastEdge.isForward && end.distance <= 0)
+            || (!lastEdge.isForward && end.distance >= lastEdge.edge.length);
+        if (firstEdgeIsTrivial && lastEdgeIsTrivial && nodes.length === 1) {
+            return {
+                ...path,
+                start: end,
+                end,
+                nodes: [],
+                orientedEdges: [Utils.last(orientedEdges)],
+            };
+        } else if (firstEdgeIsTrivial || lastEdgeIsTrivial) {
+            const newStart: EdgePoint = (() => {
+                if (firstEdgeIsTrivial) {
+                    const secondEdge = orientedEdges[1];
+                    return {
+                        edgeId: secondEdge.edge.id,
+                        distance: secondEdge.isForward ? 0 : secondEdge.edge.length,
+                    };
+                } else {
+                    return start;
+                }
+            })();
+            const newEnd: EdgePoint = (() => {
+                if (lastEdgeIsTrivial) {
+                    const secondLastEdge = orientedEdges[orientedEdges.length - 2];
+                    return {
+                        edgeId: secondLastEdge.edge.id,
+                        distance: secondLastEdge.isForward ? secondLastEdge.edge.length : 0,
+                    };
+                } else {
+                    return end;
+                }
+            })();
+            const slice = <T>(xs: T[]): T[] => xs.slice(
+                firstEdgeIsTrivial ? 1 : 0,
+                lastEdgeIsTrivial ? xs.length - 1 : xs.length,
+            );
+            return {
+                ...path,
+                start: newStart,
+                end: newEnd,
+                orientedEdges: slice(orientedEdges),
+                nodes: slice(nodes),
+            };
+        }
+        return path;
+    }
+
     private constructor(
         private readonly nodesById: Map<NodeId, Node>,
         private readonly edgesById: Map<EdgeId, Edge>,

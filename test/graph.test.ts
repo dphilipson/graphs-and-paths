@@ -786,12 +786,12 @@ describe("getClosestPoint()", () => {
 
 describe("distance()", () => {
     it("should return zero given the same point twice", () => {
-        const location: Location = {x: 1, y: 1};
+        const location: Location = { x: 1, y: 1 };
         expect(Graph.distance(location, location)).toEqual(0);
     });
 
     it("should return the distance between two points", () => {
-        expect(Graph.distance({x: 1, y: 1}, {x: 4, y: 5})).toEqual(5);
+        expect(Graph.distance({ x: 1, y: 1 }, { x: 4, y: 5 })).toEqual(5);
     });
 });
 
@@ -799,3 +799,159 @@ function expectGraphsToBeEqual(actual: Graph, expected: Graph): void {
     expect(actual.getAllNodes()).toEqual(expected.getAllNodes());
     expect(actual.getAllEdges()).toEqual(expected.getAllEdges());
 }
+
+describe("canonicalizePath()", () => {
+    it("should leave ordinary path unchanged", () => {
+        const graph = TestGraphs.getFourNodes();
+        const path: Path = {
+            start: { edgeId: "AB", distance: 0.5 },
+            end: { edgeId: "CD", distance: 0.5 },
+            nodes: [graph.getNode("B"), graph.getNode("C")],
+            orientedEdges: [
+                { edge: graph.getEdge("AB"), isForward: true },
+                { edge: graph.getEdge("BC"), isForward: true },
+                { edge: graph.getEdge("CD"), isForward: true },
+            ],
+            locations: [{ x: 0.5, y: 0 }, { x: 1, y: 0 }, { x: 2, y: 0 }, { x: 2.5, y: 0 }],
+            length: 2,
+        };
+        const canonPath = Graph.canonicalizePath(path);
+        expect(canonPath).toEqual(path);
+    });
+
+    it("should remove starting zero length segment", () => {
+        const graph = TestGraphs.getFourNodes();
+        const path: Path = {
+            start: { edgeId: "AB", distance: 1 },
+            end: { edgeId: "CD", distance: 0.5 },
+            nodes: [graph.getNode("B"), graph.getNode("C")],
+            orientedEdges: [
+                { edge: graph.getEdge("AB"), isForward: true },
+                { edge: graph.getEdge("BC"), isForward: true },
+                { edge: graph.getEdge("CD"), isForward: true },
+            ],
+            locations: [{ x: 1, y: 0 }, { x: 2, y: 0 }, { x: 2.5, y: 0 }],
+            length: 1.5,
+        };
+        const expected: Path = {
+            ...path,
+            start: { edgeId: "BC", distance: 0 },
+            nodes: [graph.getNode("C")],
+            orientedEdges: [
+                { edge: graph.getEdge("BC"), isForward: true },
+                { edge: graph.getEdge("CD"), isForward: true },
+            ],
+        };
+        const actual = Graph.canonicalizePath(path);
+        expect(actual).toEqual(expected);
+    });
+
+    it("should remove ending zero length segment", () => {
+        const graph = TestGraphs.getFourNodes();
+        const path: Path = {
+            start: { edgeId: "AB", distance: 0.5 },
+            end: { edgeId: "CD", distance: 0 },
+            nodes: [graph.getNode("B"), graph.getNode("C")],
+            orientedEdges: [
+                { edge: graph.getEdge("AB"), isForward: true },
+                { edge: graph.getEdge("BC"), isForward: true },
+                { edge: graph.getEdge("CD"), isForward: true },
+            ],
+            locations: [{ x: 0.5, y: 0 }, { x: 1, y: 0 }, { x: 2, y: 0 }],
+            length: 1.5,
+        };
+        const expected: Path = {
+            ...path,
+            end: { edgeId: "BC", distance: 1 },
+            nodes: [graph.getNode("B")],
+            orientedEdges: [
+                { edge: graph.getEdge("AB"), isForward: true },
+                { edge: graph.getEdge("BC"), isForward: true },
+            ],
+        };
+        const actual = Graph.canonicalizePath(path);
+        expect(actual).toEqual(expected);
+    });
+
+    it("should remove both starting and ending zero length segments", () => {
+        const graph = TestGraphs.getFourNodes();
+        const path: Path = {
+            start: { edgeId: "AB", distance: 1 },
+            end: { edgeId: "CD", distance: 0 },
+            nodes: [graph.getNode("B"), graph.getNode("C")],
+            orientedEdges: [
+                { edge: graph.getEdge("AB"), isForward: true },
+                { edge: graph.getEdge("BC"), isForward: true },
+                { edge: graph.getEdge("CD"), isForward: true },
+            ],
+            locations: [{ x: 1, y: 0 }, { x: 2, y: 0 }],
+            length: 1,
+        };
+        const expected: Path = {
+            ...path,
+            start: { edgeId: "BC", distance: 0 },
+            end: { edgeId: "BC", distance: 1 },
+            nodes: [],
+            orientedEdges: [
+                { edge: graph.getEdge("BC"), isForward: true },
+            ],
+        };
+        const actual = Graph.canonicalizePath(path);
+        expect(actual).toEqual(expected);
+    });
+
+    it("should behave on single point path", () => {
+        const graph = TestGraphs.getTwoNodes();
+        const start = { edgeId: "AB", distance: 0.5 };
+        const path: Path = {
+            start,
+            end: start,
+            nodes: [],
+            orientedEdges: [{ edge: graph.getEdge("AB"), isForward: true }],
+            locations: [{ x: 0.5, y: 0 }],
+            length: 0,
+        };
+        const canonPath = Graph.canonicalizePath(path);
+        expect(canonPath).toBe(path);
+    });
+
+    it("should behave on single point path where that point is a node", () => {
+        const graph = TestGraphs.getTwoNodes();
+        const start = { edgeId: "AB", distance: 1 };
+        const path: Path = {
+            start,
+            end: start,
+            nodes: [],
+            orientedEdges: [{ edge: graph.getEdge("AB"), isForward: true }],
+            locations: [{ x: 1, y: 0 }],
+            length: 0,
+        };
+        const canonPath = Graph.canonicalizePath(path);
+        expect(canonPath).toBe(path);
+    });
+
+    it("should behave on path where start and end are different representations of same node", () => {
+        const graph = TestGraphs.getFourNodes();
+        const start = { edgeId: "AB", distance: 1 };
+        const end = { edgeId: "BC", distance: 0 };
+        const path: Path = {
+            start,
+            end,
+            nodes: [graph.getNode("B")],
+            orientedEdges: [
+                { edge: graph.getEdge("AB"), isForward: true },
+                { edge: graph.getEdge("BC"), isForward: true },
+            ],
+            locations: [{ x: 1, y: 0 }],
+            length: 0,
+        };
+        const expected: Path = {
+            ...path,
+            start: end,
+            nodes: [],
+            orientedEdges: [{ edge: graph.getEdge("BC"), isForward: true }],
+        };
+        const actual = Graph.canonicalizePath(path);
+        expect(expected).toEqual(actual);
+    });
+});
