@@ -469,6 +469,20 @@ describe("getConnectedComponentsForNode()", () => {
 });
 
 describe("getShortestPath()", () => {
+    const originalCanonicalize = (Graph as any).canonicalizePath;
+    const canonicalizeSpy = jest.fn(originalCanonicalize);
+    (Graph as any).canonicalizePath = canonicalizeSpy;
+
+    afterAll(() => {
+        (Graph as any).canonicalizePath = originalCanonicalize;
+    });
+
+    beforeEach(canonicalizeSpy.mockClear);
+
+    afterEach(() => {
+        expect(canonicalizeSpy).toHaveBeenCalled();
+    });
+
     it("should return a path crossing over nodes", () => {
         const graph = TestGraphs.getFourNodes();
         const start: EdgePoint = { edgeId: "AB", distance: 0.5 };
@@ -693,12 +707,12 @@ describe("advancePath()", () => {
     };
 
     it("should return the same path if distance is zero", () => {
-        const advanced = graph.advanceAlongPath(path, 0);
+        const advanced = Graph.advanceAlongPath(path, 0);
         expect(advanced).toEqual(path);
     });
 
     it("should advance path, dropping nodes and edges", () => {
-        const advanced = graph.advanceAlongPath(path, 1.75);
+        const advanced = Graph.advanceAlongPath(path, 1.75);
         const expected: Path = {
             start: { edgeId: "CD", distance: 0.25 },
             end: { edgeId: "CD", distance: 0.5 },
@@ -714,7 +728,7 @@ describe("advancePath()", () => {
     });
 
     it("should return a single-point path if distance is greater than length", () => {
-        const advanced = graph.advanceAlongPath(path, 3);
+        const advanced = Graph.advanceAlongPath(path, 3);
         const expected: Path = {
             start: { edgeId: "CD", distance: 0.5 },
             end: { edgeId: "CD", distance: 0.5 },
@@ -726,8 +740,21 @@ describe("advancePath()", () => {
         expect(advanced).toEqual(expected);
     });
 
+    it("should advance to the next edge if landing exactly on a node", () => {
+        const advanced = Graph.advanceAlongPath(path, 1.5);
+        const expected: Path = {
+            start: { edgeId: "CD", distance: 0 },
+            end: { edgeId: "CD", distance: 0.5 },
+            orientedEdges: [{ edge: graph.getEdge("CD"), isForward: true }],
+            nodes: [],
+            locations: [{ x: 2, y: 0 }, { x: 2.5, y: 0 }],
+            length: 0.5,
+        };
+        expect(advanced).toEqual(expected);
+    })
+
     it("should throw on negative distance", () => {
-        expect(() => graph.advanceAlongPath(path, -1)).toThrowError(/negative/);
+        expect(() => Graph.advanceAlongPath(path, -1)).toThrowError(/negative/);
     });
 });
 
@@ -801,6 +828,9 @@ function expectGraphsToBeEqual(actual: Graph, expected: Graph): void {
 }
 
 describe("canonicalizePath()", () => {
+    // Expose private static method.
+    const canonicalizePath: (path: Path) => Path = (Graph as any).canonicalizePath;
+
     it("should leave ordinary path unchanged", () => {
         const graph = TestGraphs.getFourNodes();
         const path: Path = {
@@ -815,7 +845,7 @@ describe("canonicalizePath()", () => {
             locations: [{ x: 0.5, y: 0 }, { x: 1, y: 0 }, { x: 2, y: 0 }, { x: 2.5, y: 0 }],
             length: 2,
         };
-        const canonPath = Graph.canonicalizePath(path);
+        const canonPath = canonicalizePath(path);
         expect(canonPath).toEqual(path);
     });
 
@@ -842,7 +872,7 @@ describe("canonicalizePath()", () => {
                 { edge: graph.getEdge("CD"), isForward: true },
             ],
         };
-        const actual = Graph.canonicalizePath(path);
+        const actual = canonicalizePath(path);
         expect(actual).toEqual(expected);
     });
 
@@ -869,7 +899,7 @@ describe("canonicalizePath()", () => {
                 { edge: graph.getEdge("BC"), isForward: true },
             ],
         };
-        const actual = Graph.canonicalizePath(path);
+        const actual = canonicalizePath(path);
         expect(actual).toEqual(expected);
     });
 
@@ -896,7 +926,7 @@ describe("canonicalizePath()", () => {
                 { edge: graph.getEdge("BC"), isForward: true },
             ],
         };
-        const actual = Graph.canonicalizePath(path);
+        const actual = canonicalizePath(path);
         expect(actual).toEqual(expected);
     });
 
@@ -911,7 +941,7 @@ describe("canonicalizePath()", () => {
             locations: [{ x: 0.5, y: 0 }],
             length: 0,
         };
-        const canonPath = Graph.canonicalizePath(path);
+        const canonPath = canonicalizePath(path);
         expect(canonPath).toBe(path);
     });
 
@@ -926,7 +956,7 @@ describe("canonicalizePath()", () => {
             locations: [{ x: 1, y: 0 }],
             length: 0,
         };
-        const canonPath = Graph.canonicalizePath(path);
+        const canonPath = canonicalizePath(path);
         expect(canonPath).toBe(path);
     });
 
@@ -951,7 +981,7 @@ describe("canonicalizePath()", () => {
             nodes: [],
             orientedEdges: [{ edge: graph.getEdge("BC"), isForward: true }],
         };
-        const actual = Graph.canonicalizePath(path);
+        const actual = canonicalizePath(path);
         expect(expected).toEqual(actual);
     });
 });

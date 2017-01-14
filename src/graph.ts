@@ -164,10 +164,77 @@ export default class Graph {
     }
 
     /**
+     * Returns a new path obtained by truncating the given path by the provided distance. That is,
+     * the start point of the path moves forward, and any nodes and edges that it passes are
+     * dropped. Throws an error if distance is negative.
+     * 
+     * @param path A path.
+     * @param distance A distance to travel along the path.
+     * @returns The remaining portion of `path` after traveling `distance` along it.
+     */
+    public static advanceAlongPath(path: Path, distance: number): Path {
+        const { start, end, orientedEdges, nodes, locations, length } = path;
+        if (distance === 0) {
+            return path;
+        } else if (distance >= length) {
+            return Graph.getFinishedPath(path);
+        } else if (distance < 0) {
+            throw new Error("Cannot advance path by a negative distance");
+        } else {
+            const {
+                edge: startEdge,
+                isForward: isStartEdgeForward,
+            } = orientedEdges[0];
+            const orientedStartDistance = isStartEdgeForward
+                ? start.distance
+                : startEdge.length - start.distance;
+            let distanceRemaining = distance + orientedStartDistance;
+            let edgeIndex = 0;
+            while (distanceRemaining >= orientedEdges[edgeIndex].edge.length) {
+                distanceRemaining -= orientedEdges[edgeIndex].edge.length;
+                edgeIndex++;
+                if (edgeIndex >= orientedEdges.length) {
+                    // Only possible through floating-point imprecision because of earlier check
+                    // against total distance. I'm not even sure this case is possible, but better
+                    // safe than sorry.
+                    return Graph.getFinishedPath(path);
+                }
+            }
+            const newStartEdge = orientedEdges[edgeIndex];
+            const distanceDownEdge = newStartEdge.isForward
+                ? distanceRemaining
+                : newStartEdge.edge.length - distanceRemaining;
+            return {
+                start: { edgeId: newStartEdge.edge.id, distance: distanceDownEdge },
+                end,
+                orientedEdges: orientedEdges.slice(edgeIndex),
+                nodes: nodes.slice(edgeIndex),
+                locations: Graph.advanceAlongLocations(locations, distance),
+                length: length - distance,
+            };
+        }
+    }
+
+    /**
+     * Returns the path obtained when advancing the given path all the way to the end.
+     */
+    private static getFinishedPath(path: Path): Path {
+        const { end, orientedEdges, locations } = path;
+        return {
+            start: end,
+            end,
+            orientedEdges: [Utils.last(orientedEdges)],
+            nodes: [],
+            locations: [Utils.last(locations)],
+            length: 0,
+        };
+    }
+
+    /**
      * Removes zero-length segments at the start and end of the path caused by the ambiguity of
      * representing a Node location with an EdgePoint.
      */
-    public static canonicalizePath(path: Path): Path {
+    private static canonicalizePath(path: Path): Path {
         const { start, end, orientedEdges, nodes } = path;
         if (start === end) {
             return path;
@@ -220,8 +287,9 @@ export default class Graph {
                 orientedEdges: slice(orientedEdges),
                 nodes: slice(nodes),
             };
+        } else {
+            return path;
         }
-        return path;
     }
 
     private constructor(
@@ -464,7 +532,13 @@ export default class Graph {
         while (!pendingNodes.empty()) {
             const currentNodeId = pendingNodes.pop().nodeId;
             if (currentNodeId == null) {
-                return this.reconstructPath(start, end, cameFrom, endEdgeIsForward, endDistanceFromStart);
+                return Graph.canonicalizePath(this.reconstructPath(
+                    start,
+                    end,
+                    cameFrom,
+                    endEdgeIsForward,
+                    endDistanceFromStart,
+                ));
             } else {
                 doneNodeIds.add(currentNodeId);
                 const currentNodeDistance = distancesFromStart.get(currentNodeId);
@@ -498,59 +572,6 @@ export default class Graph {
             }
         }
         throw new Error(`No path from starting edge ${start.edgeId} to ending edge ${end.edgeId}`);
-    }
-
-    /**
-     * Returns a new path obtained by truncating the given path by the provided distance. That is,
-     * the start point of the path moves forward, and any nodes and edges that it passes are
-     * dropped. Throws an error if distance is negative.
-     * 
-     * @param path A path.
-     * @param distance A distance to travel along the path.
-     * @returns The remaining portion of `path` after traveling `distance` along it.
-     */
-    public advanceAlongPath(path: Path, distance: number): Path {
-        const { start, end, orientedEdges, nodes, locations, length } = path;
-        if (distance === 0) {
-            return path;
-        } else if (distance >= path.length) {
-            return {
-                start: end,
-                end,
-                orientedEdges: [Utils.last(orientedEdges)],
-                nodes: [],
-                locations: [Utils.last(path.locations)],
-                length: 0,
-            };
-        } else if (distance < 0) {
-            throw new Error("Cannot advance path by a negative distance");
-        } else {
-            const {
-                edge: startEdge,
-                isForward: isStartEdgeForward,
-            } = orientedEdges[0];
-            const orientedStartDistance = isStartEdgeForward
-                ? start.distance
-                : startEdge.length - start.distance;
-            let distanceRemaining = distance + orientedStartDistance;
-            let edgeIndex = 0;
-            while (distanceRemaining > orientedEdges[edgeIndex].edge.length) {
-                distanceRemaining -= orientedEdges[edgeIndex].edge.length;
-                edgeIndex++;
-            }
-            const newStartEdge = orientedEdges[edgeIndex];
-            const distanceDownEdge = newStartEdge.isForward
-                ? distanceRemaining
-                : newStartEdge.edge.length - distanceRemaining;
-            return {
-                start: { edgeId: newStartEdge.edge.id, distance: distanceDownEdge },
-                end,
-                orientedEdges: orientedEdges.slice(edgeIndex),
-                nodes: nodes.slice(edgeIndex),
-                locations: Graph.advanceAlongLocations(locations, distance),
-                length: length - distance,
-            };
-        }
     }
 
     /**
