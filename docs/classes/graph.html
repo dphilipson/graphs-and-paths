@@ -913,9 +913,6 @@ img { max-width: 100%; }
 			<a href="graph.html" class="tsd-kind-icon">Graph</a>
 			<ul>
 				<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-external">
-					<a href="graph.html#advancealongpath" class="tsd-kind-icon">advance<wbr>Along<wbr>Path</a>
-				</li>
-				<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-external">
 					<a href="graph.html#coalesced" class="tsd-kind-icon">coalesced</a>
 				</li>
 				<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-external">
@@ -962,6 +959,9 @@ img { max-width: 100%; }
 				</li>
 				<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-static tsd-is-external">
 					<a href="graph.html#advancealonglocations" class="tsd-kind-icon">advance<wbr>Along<wbr>Locations</a>
+				</li>
+				<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-static tsd-is-external">
+					<a href="graph.html#advancealongpath" class="tsd-kind-icon">advance<wbr>Along<wbr>Path</a>
 				</li>
 				<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-static tsd-is-external">
 					<a href="graph.html#create" class="tsd-kind-icon">create</a>
@@ -1071,7 +1071,6 @@ graph.getShortestPath(
 					<section class="tsd-index-section tsd-is-external">
 						<h3>Methods</h3>
 						<ul class="tsd-index-list">
-							<li class="tsd-kind-method tsd-parent-kind-class tsd-is-external"><a href="graph.html#advancealongpath" class="tsd-kind-icon">advance<wbr>Along<wbr>Path</a></li>
 							<li class="tsd-kind-method tsd-parent-kind-class tsd-is-external"><a href="graph.html#coalesced" class="tsd-kind-icon">coalesced</a></li>
 							<li class="tsd-kind-method tsd-parent-kind-class tsd-is-external"><a href="graph.html#getalledges" class="tsd-kind-icon">get<wbr>All<wbr>Edges</a></li>
 							<li class="tsd-kind-method tsd-parent-kind-class tsd-is-external"><a href="graph.html#getallnodes" class="tsd-kind-icon">get<wbr>All<wbr>Nodes</a></li>
@@ -1088,6 +1087,7 @@ graph.getShortestPath(
 							<li class="tsd-kind-method tsd-parent-kind-class tsd-is-external"><a href="graph.html#getshortestpath" class="tsd-kind-icon">get<wbr>Shortest<wbr>Path</a></li>
 							<li class="tsd-kind-method tsd-parent-kind-class tsd-is-external"><a href="graph.html#withclosestpointmesh" class="tsd-kind-icon">with<wbr>Closest<wbr>Point<wbr>Mesh</a></li>
 							<li class="tsd-kind-method tsd-parent-kind-class tsd-is-static tsd-is-external"><a href="graph.html#advancealonglocations" class="tsd-kind-icon">advance<wbr>Along<wbr>Locations</a></li>
+							<li class="tsd-kind-method tsd-parent-kind-class tsd-is-static tsd-is-external"><a href="graph.html#advancealongpath" class="tsd-kind-icon">advance<wbr>Along<wbr>Path</a></li>
 							<li class="tsd-kind-method tsd-parent-kind-class tsd-is-static tsd-is-external"><a href="graph.html#create" class="tsd-kind-icon">create</a></li>
 							<li class="tsd-kind-method tsd-parent-kind-class tsd-is-static tsd-is-external"><a href="graph.html#distance" class="tsd-kind-icon">distance</a></li>
 						</ul>
@@ -1098,46 +1098,6 @@ graph.getShortestPath(
 		<section class="tsd-panel-group tsd-member-group tsd-is-external">
 			<h2>Methods</h2>
 			<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-external">
-				<a name="advancealongpath" class="tsd-anchor"></a>
-				<h3>advance<wbr>Along<wbr>Path</h3>
-				<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-external">
-					<li class="tsd-signature tsd-kind-icon">advance<wbr>Along<wbr>Path<span class="tsd-signature-symbol">(</span>path<span class="tsd-signature-symbol">: </span><a href="../interfaces/path.html" class="tsd-signature-type">Path</a>, distance<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../interfaces/path.html" class="tsd-signature-type">Path</a></li>
-				</ul>
-				<ul class="tsd-descriptions">
-					<li class="tsd-description">
-						<aside class="tsd-sources">
-							<ul>
-								<li>Defined in <a href="https://github.com/dphilipson/graphs-and-paths/blob/f583622/src/graph.ts#L451">graph.ts:451</a></li>
-							</ul>
-						</aside>
-						<div class="tsd-comment tsd-typography">
-							<div class="lead">
-								<p>Returns a new path obtained by truncating the given path by the provided distance. That is,
-									the start point of the path moves forward, and any nodes and edges that it passes are
-								dropped. Throws an error if distance is negative.</p>
-							</div>
-						</div>
-						<h4 class="tsd-parameters-title">Parameters</h4>
-						<ul class="tsd-parameters">
-							<li>
-								<h5>path: <a href="../interfaces/path.html" class="tsd-signature-type">Path</a></h5>
-								<div class="tsd-comment tsd-typography">
-									<p>A path.</p>
-								</div>
-							</li>
-							<li>
-								<h5>distance: <span class="tsd-signature-type">number</span></h5>
-								<div class="tsd-comment tsd-typography">
-									<p>A distance to travel along the path.</p>
-								</div>
-							</li>
-						</ul>
-						<h4 class="tsd-returns-title">Returns <a href="../interfaces/path.html" class="tsd-signature-type">Path</a></h4>
-						<p>The remaining portion of <code>path</code> after traveling <code>distance</code> along it.</p>
-					</li>
-				</ul>
-			</section>
-			<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-external">
 				<a name="coalesced" class="tsd-anchor"></a>
 				<h3>coalesced</h3>
 				<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-external">
@@ -1147,7 +1107,7 @@ graph.getShortestPath(
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/dphilipson/graphs-and-paths/blob/f583622/src/graph.ts#L289">graph.ts:289</a></li>
+								<li>Defined in <a href="https://github.com/dphilipson/graphs-and-paths/blob/36a2a1f/src/graph.ts#L418">graph.ts:418</a></li>
 							</ul>
 						</aside>
 						<div class="tsd-comment tsd-typography">
@@ -1177,7 +1137,7 @@ graph.getShortestPath(
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/dphilipson/graphs-and-paths/blob/f583622/src/graph.ts#L184">graph.ts:184</a></li>
+								<li>Defined in <a href="https://github.com/dphilipson/graphs-and-paths/blob/36a2a1f/src/graph.ts#L313">graph.ts:313</a></li>
 							</ul>
 						</aside>
 						<div class="tsd-comment tsd-typography">
@@ -1198,7 +1158,7 @@ graph.getShortestPath(
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/dphilipson/graphs-and-paths/blob/f583622/src/graph.ts#L176">graph.ts:176</a></li>
+								<li>Defined in <a href="https://github.com/dphilipson/graphs-and-paths/blob/36a2a1f/src/graph.ts#L305">graph.ts:305</a></li>
 							</ul>
 						</aside>
 						<div class="tsd-comment tsd-typography">
@@ -1219,7 +1179,7 @@ graph.getShortestPath(
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/dphilipson/graphs-and-paths/blob/f583622/src/graph.ts#L540">graph.ts:540</a></li>
+								<li>Defined in <a href="https://github.com/dphilipson/graphs-and-paths/blob/36a2a1f/src/graph.ts#L622">graph.ts:622</a></li>
 							</ul>
 						</aside>
 						<div class="tsd-comment tsd-typography">
@@ -1254,7 +1214,7 @@ graph.getShortestPath(
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/dphilipson/graphs-and-paths/blob/f583622/src/graph.ts#L351">graph.ts:351</a></li>
+								<li>Defined in <a href="https://github.com/dphilipson/graphs-and-paths/blob/36a2a1f/src/graph.ts#L480">graph.ts:480</a></li>
 							</ul>
 						</aside>
 						<div class="tsd-comment tsd-typography">
@@ -1284,7 +1244,7 @@ graph.getShortestPath(
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/dphilipson/graphs-and-paths/blob/f583622/src/graph.ts#L333">graph.ts:333</a></li>
+								<li>Defined in <a href="https://github.com/dphilipson/graphs-and-paths/blob/36a2a1f/src/graph.ts#L462">graph.ts:462</a></li>
 							</ul>
 						</aside>
 						<div class="tsd-comment tsd-typography">
@@ -1305,7 +1265,7 @@ graph.getShortestPath(
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/dphilipson/graphs-and-paths/blob/f583622/src/graph.ts#L204">graph.ts:204</a></li>
+								<li>Defined in <a href="https://github.com/dphilipson/graphs-and-paths/blob/36a2a1f/src/graph.ts#L333">graph.ts:333</a></li>
 							</ul>
 						</aside>
 						<div class="tsd-comment tsd-typography">
@@ -1336,7 +1296,7 @@ graph.getShortestPath(
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/dphilipson/graphs-and-paths/blob/f583622/src/graph.ts#L212">graph.ts:212</a></li>
+								<li>Defined in <a href="https://github.com/dphilipson/graphs-and-paths/blob/36a2a1f/src/graph.ts#L341">graph.ts:341</a></li>
 							</ul>
 						</aside>
 						<div class="tsd-comment tsd-typography">
@@ -1365,7 +1325,7 @@ graph.getShortestPath(
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/dphilipson/graphs-and-paths/blob/f583622/src/graph.ts#L220">graph.ts:220</a></li>
+								<li>Defined in <a href="https://github.com/dphilipson/graphs-and-paths/blob/36a2a1f/src/graph.ts#L349">graph.ts:349</a></li>
 							</ul>
 						</aside>
 						<div class="tsd-comment tsd-typography">
@@ -1394,7 +1354,7 @@ graph.getShortestPath(
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/dphilipson/graphs-and-paths/blob/f583622/src/graph.ts#L262">graph.ts:262</a></li>
+								<li>Defined in <a href="https://github.com/dphilipson/graphs-and-paths/blob/36a2a1f/src/graph.ts#L391">graph.ts:391</a></li>
 							</ul>
 						</aside>
 						<div class="tsd-comment tsd-typography">
@@ -1429,7 +1389,7 @@ graph.getShortestPath(
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/dphilipson/graphs-and-paths/blob/f583622/src/graph.ts#L248">graph.ts:248</a></li>
+								<li>Defined in <a href="https://github.com/dphilipson/graphs-and-paths/blob/36a2a1f/src/graph.ts#L377">graph.ts:377</a></li>
 							</ul>
 						</aside>
 						<div class="tsd-comment tsd-typography">
@@ -1458,7 +1418,7 @@ graph.getShortestPath(
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/dphilipson/graphs-and-paths/blob/f583622/src/graph.ts#L194">graph.ts:194</a></li>
+								<li>Defined in <a href="https://github.com/dphilipson/graphs-and-paths/blob/36a2a1f/src/graph.ts#L323">graph.ts:323</a></li>
 							</ul>
 						</aside>
 						<div class="tsd-comment tsd-typography">
@@ -1489,7 +1449,7 @@ graph.getShortestPath(
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/dphilipson/graphs-and-paths/blob/f583622/src/graph.ts#L233">graph.ts:233</a></li>
+								<li>Defined in <a href="https://github.com/dphilipson/graphs-and-paths/blob/36a2a1f/src/graph.ts#L362">graph.ts:362</a></li>
 							</ul>
 						</aside>
 						<div class="tsd-comment tsd-typography">
@@ -1528,7 +1488,7 @@ graph.getShortestPath(
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/dphilipson/graphs-and-paths/blob/f583622/src/graph.ts#L379">graph.ts:379</a></li>
+								<li>Defined in <a href="https://github.com/dphilipson/graphs-and-paths/blob/36a2a1f/src/graph.ts#L508">graph.ts:508</a></li>
 							</ul>
 						</aside>
 						<div class="tsd-comment tsd-typography">
@@ -1566,7 +1526,7 @@ graph.getShortestPath(
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/dphilipson/graphs-and-paths/blob/f583622/src/graph.ts#L504">graph.ts:504</a></li>
+								<li>Defined in <a href="https://github.com/dphilipson/graphs-and-paths/blob/36a2a1f/src/graph.ts#L586">graph.ts:586</a></li>
 							</ul>
 						</aside>
 						<div class="tsd-comment tsd-typography">
@@ -1601,7 +1561,7 @@ graph.getShortestPath(
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/dphilipson/graphs-and-paths/blob/f583622/src/graph.ts#L143">graph.ts:143</a></li>
+								<li>Defined in <a href="https://github.com/dphilipson/graphs-and-paths/blob/36a2a1f/src/graph.ts#L143">graph.ts:143</a></li>
 							</ul>
 						</aside>
 						<div class="tsd-comment tsd-typography">
@@ -1633,6 +1593,46 @@ graph.getShortestPath(
 				</ul>
 			</section>
 			<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-static tsd-is-external">
+				<a name="advancealongpath" class="tsd-anchor"></a>
+				<h3>advance<wbr>Along<wbr>Path</h3>
+				<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-static tsd-is-external">
+					<li class="tsd-signature tsd-kind-icon">advance<wbr>Along<wbr>Path<span class="tsd-signature-symbol">(</span>path<span class="tsd-signature-symbol">: </span><a href="../interfaces/path.html" class="tsd-signature-type">Path</a>, distance<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../interfaces/path.html" class="tsd-signature-type">Path</a></li>
+				</ul>
+				<ul class="tsd-descriptions">
+					<li class="tsd-description">
+						<aside class="tsd-sources">
+							<ul>
+								<li>Defined in <a href="https://github.com/dphilipson/graphs-and-paths/blob/36a2a1f/src/graph.ts#L175">graph.ts:175</a></li>
+							</ul>
+						</aside>
+						<div class="tsd-comment tsd-typography">
+							<div class="lead">
+								<p>Returns a new path obtained by truncating the given path by the provided distance. That is,
+									the start point of the path moves forward, and any nodes and edges that it passes are
+								dropped. Throws an error if distance is negative.</p>
+							</div>
+						</div>
+						<h4 class="tsd-parameters-title">Parameters</h4>
+						<ul class="tsd-parameters">
+							<li>
+								<h5>path: <a href="../interfaces/path.html" class="tsd-signature-type">Path</a></h5>
+								<div class="tsd-comment tsd-typography">
+									<p>A path.</p>
+								</div>
+							</li>
+							<li>
+								<h5>distance: <span class="tsd-signature-type">number</span></h5>
+								<div class="tsd-comment tsd-typography">
+									<p>A distance to travel along the path.</p>
+								</div>
+							</li>
+						</ul>
+						<h4 class="tsd-returns-title">Returns <a href="../interfaces/path.html" class="tsd-signature-type">Path</a></h4>
+						<p>The remaining portion of <code>path</code> after traveling <code>distance</code> along it.</p>
+					</li>
+				</ul>
+			</section>
+			<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-static tsd-is-external">
 				<a name="create" class="tsd-anchor"></a>
 				<h3>create</h3>
 				<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-static tsd-is-external">
@@ -1642,7 +1642,7 @@ graph.getShortestPath(
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/dphilipson/graphs-and-paths/blob/f583622/src/graph.ts#L80">graph.ts:80</a></li>
+								<li>Defined in <a href="https://github.com/dphilipson/graphs-and-paths/blob/36a2a1f/src/graph.ts#L80">graph.ts:80</a></li>
 							</ul>
 						</aside>
 						<div class="tsd-comment tsd-typography">
@@ -1677,7 +1677,7 @@ graph.getShortestPath(
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/dphilipson/graphs-and-paths/blob/f583622/src/graph.ts#L129">graph.ts:129</a></li>
+								<li>Defined in <a href="https://github.com/dphilipson/graphs-and-paths/blob/36a2a1f/src/graph.ts#L129">graph.ts:129</a></li>
 							</ul>
 						</aside>
 						<div class="tsd-comment tsd-typography">
