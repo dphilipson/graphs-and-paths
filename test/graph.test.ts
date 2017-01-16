@@ -751,7 +751,7 @@ describe("advancePath()", () => {
             length: 0.5,
         };
         expect(advanced).toEqual(expected);
-    })
+    });
 
     it("should throw on negative distance", () => {
         expect(() => Graph.advanceAlongPath(path, -1)).toThrowError(/negative/);
