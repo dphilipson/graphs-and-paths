@@ -28,19 +28,19 @@ interface MeshPoint {
 /**
  * A graph composed of [[Node]]s and [[Edge]]s, representing 2-D spatial points and links between
  * them. Provides methods for reading and analyzing its data.
- * 
+ *
  * The graph and all its data are immutable. No method will modify the `Graph` instance on which it
  * is called, although some will return new instances.
- * 
+ *
  * New `Graph` instances are created using [[Graph.create]], which takes [[SimpleNode]]s and
  * [[SimpleEdge]]s as arguments. Upon construction, the graph creates corresponding [[Node]] and
  * [[Edge]] instances which contain additional information. All `Graph` methods will return these
  * `Node`s rather than the original `SimpleNode`s, and likewise for edges.
- * 
+ *
  * Example usage:
  * ``` javascript
  * import Graph from "graphs-and-paths";
- * 
+ *
  * const nodes = [
  *     { id: "A", location: { x: 0, y: 0 } },
  *     { id: "B", location: { x: 3, y: 0 } },
@@ -52,13 +52,13 @@ interface MeshPoint {
  *     { id: "CA", startNodeId: "C", endNodeId: "A" }
  * ];
  * const graph = Graph.create(nodes, edges);
- * 
+ *
  * graph.getNode("A");
  * // { id: "A", location: { x: 0, y: 0 }, edgeIds: ["AB", "CA"] }
- * 
+ *
  * graph.getLocation("AB", 2);
  * // { x: 2, y: 0 }
- * 
+ *
  * graph.getShortestPath(
  *     { edgeId: "CA", distance: 3 },
  *     { edgeId: "BC", distance: 1 }
@@ -134,7 +134,7 @@ export default class Graph {
      * Helper function for computing progress down a path after advancing along it for a given
      * distance. If the distance is greater than the total length of the path, then advances to
      * the end of the path. Throws on negative distances.
-     * 
+     *
      * @param locations A list of locations representing a path.
      * @param distance A distance down the path.
      * @returns A new list of locations representing the remaining part of `locations` after
@@ -167,7 +167,7 @@ export default class Graph {
      * Returns a new path obtained by truncating the given path by the provided distance. That is,
      * the start point of the path moves forward, and any nodes and edges that it passes are
      * dropped. Throws an error if distance is negative.
-     * 
+     *
      * @param path A path.
      * @param distance A distance to travel along the path.
      * @returns The remaining portion of `path` after traveling `distance` along it.
@@ -236,7 +236,7 @@ export default class Graph {
      */
     private static canonicalizePath(path: Path): Path {
         const { start, end, orientedEdges, nodes } = path;
-        if (start === end) {
+        if (path.orientedEdges.length === 1) {
             return path;
         }
         const firstEdge = orientedEdges[0];
@@ -354,7 +354,7 @@ export default class Graph {
     /**
      * Given an edge and one of its endpoints, return the other endpoint. Throws if either of the
      * IDs is nonexistent, or if the node is not an endpoint of the edge.
-     * 
+     *
      * @param edgeId An edge ID.
      * @param nodeId A node ID, referencing one of the endpoints of the edge.
      * @returns The node which is the other endpoint of the edge with the given ID.
@@ -384,7 +384,7 @@ export default class Graph {
      * throw on out-of-bounds distances. Instead negative distances return the start of the edge
      * and distances greater than the length return the end of the edge. This is to avoid unexpected
      * behavior due to floating-point imprecision issues.
-     * 
+     *
      * @param edgePoint A point specified as a certain distance along an edge.
      * @return The Cartesian coordinates of the given point.
      */
@@ -409,10 +409,10 @@ export default class Graph {
      * particular, the new graph will have no nodes of degree 2 except for nodes with only one edge
      * connecting to themselves. This may significantly increase the speed of certain calculations,
      * such as [[getShortestPath]].
-     * 
+     *
      * A newly created edge will have the lowest ID of the edges which were combined to form it,
      * where numbers are considered lower than strings.
-     * 
+     *
      * @returns A new coalesced `Graph` instance.
      */
     public coalesced(): Graph {
@@ -500,7 +500,7 @@ export default class Graph {
 
     /**
      * Returns the shortest path between two points on the graph. Throws if no such path exists.
-     * 
+     *
      * @param start A point along the graph.
      * @param end Another point along the graph.
      * @returns The shortest path from the first point to the second.
@@ -577,7 +577,7 @@ export default class Graph {
     /**
      * Does preprocessing to enable [[getClosestPoint]] by creating a spatial index for mesh of
      * points along the graph.
-     * 
+     *
      * @param precision How fine the mesh should be. Lower precision is more accurate but takes
      *        more time to precompute and more memory. As a rule-of-thumb, [[getClosestPoint]] will
      *        be accurate to within `precision` distance.
@@ -614,7 +614,7 @@ export default class Graph {
      * Returns the closest point on the graph to a given location. This requires the graph to have
      * a spatial index. To enable this, first use [[withClosestPointMesh]] to obtain a new graph
      * instance with an index enabled. Calling this method on a graph with no index will throw.
-     * 
+     *
      * @param location A location.
      * @returns The point on the graph closest to the given location, up to a precision determined
      *          by the graph's mesh.
@@ -651,7 +651,7 @@ export default class Graph {
      * directions as long as there is only one way to do so, i.e. until
      * reaching a fork. Returns an array of the edges seen, oriented so that
      * the start edge is oriented forward.
-     * 
+     *
      * In the case of an isolated loop, the returned path will begin and end at
      * the start node of the provided edge.
      */
@@ -669,7 +669,7 @@ export default class Graph {
     /**
      * Like getOnlyPath(), but only in one direction. The returned path will
      * start with the provided edge in and proceed in the direction specified.
-     * 
+     *
      * If the edge is part of an isolated loop (so no fork is found), then the
      * last element of the returned array will be the same as the first one.
      */

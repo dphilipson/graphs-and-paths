@@ -483,6 +483,22 @@ describe("getShortestPath()", () => {
         expect(canonicalizeSpy).toHaveBeenCalled();
     });
 
+    it("should return a trivial path when start and end are the same", () => {
+        const graph = TestGraphs.getTwoNodes();
+        const start: EdgePoint = { edgeId: "AB", distance: 0 };
+        const end: EdgePoint = { edgeId: "AB", distance: 0 };
+        const expectedPath: Path = {
+            start,
+            end: start,
+            orientedEdges: [{ edge: graph.getEdge("AB"), isForward: true }],
+            nodes: [],
+            locations: [{ x: 0, y: 0 }],
+            length: 0,
+        };
+        const path = graph.getShortestPath(start, end);
+        expect(path).toEqual(expectedPath);
+    });
+
     it("should return a path crossing over nodes", () => {
         const graph = TestGraphs.getFourNodes();
         const start: EdgePoint = { edgeId: "AB", distance: 0.5 };
@@ -642,21 +658,6 @@ describe("getShortestPath()", () => {
             length: 1.5,
         };
         const path = graph.getShortestPath(start, end);
-        expect(path).toEqual(expectedPath);
-    });
-
-    it("should return a single-point path if start and end are the same", () => {
-        const graph = TestGraphs.getTwoNodes();
-        const start: EdgePoint = { edgeId: "AB", distance: 0.5 };
-        const expectedPath: Path = {
-            start,
-            end: start,
-            orientedEdges: [{ edge: graph.getEdge("AB"), isForward: true }],
-            nodes: [],
-            locations: [{ x: 0.5, y: 0 }],
-            length: 0,
-        };
-        const path = graph.getShortestPath(start, start);
         expect(path).toEqual(expectedPath);
     });
 });
