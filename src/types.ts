@@ -28,10 +28,10 @@ export interface SimpleNode {
  * Basic information about an edge used to initially create a [[Graph]]. Once a graph is
  * constructed, all of its methods will return [[Edge]]s instead, which contain additional useful
  * information.
- * 
+ *
  * An edge is specified by which nodes are its "start" and "end." The direction of an edge is
  * arbitrary, but once set will be handled consistently by the [[Graph]] methods.
- * 
+ *
  * The edge may also specify internal locations which it passes through on its way between its
  * endpoints. That is, an edge may curve and does not necessarily represent a physical straight
  * line.
@@ -72,10 +72,10 @@ export interface Node extends SimpleNode {
 /**
  * An edge in a [[Graph]]. Like a [[SimpleEdge]], but with additional information for convenience
  * and efficiency.
- * 
+ *
  * An edge is specified by which nodes are its "start" and "end." The direction of an edge is
  * arbitrary, but once set will be handled consistently by the `Graph` methods.
- * 
+ *
  * The edge may also specify internal locations which it passes through on its way between its
  * endpoints. That is, an edge may curve and does not necessarily represent a physical straight
  * line.

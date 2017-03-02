@@ -18,7 +18,7 @@ export function last<T>(ts: T[]): T {
  * returned array is the distance from the start of the path to its ith location. In particular,
  * this means the first element of the returned array is 0 and the last element is the total length
  * of the path.
- * 
+ *
  * @hidden
  */
 export function getCumulativeDistances(path: Location[]): number[] {
@@ -38,7 +38,7 @@ export function getCumulativeDistances(path: Location[]): number[] {
 /**
  * Assuming xs is sorted, returns the index of the largest element of xs which is at most x. If all
  * elements xs are larger than x, then return -1.
- * 
+ *
  * @hidden
  */
 export function findFloorIndex(xs: number[], x: number): number {
@@ -121,7 +121,7 @@ export function min<T>(array: T[], comparator: (t1: T, t2: T) => number): T {
 
 /**
  * Returns information about the closest point on segment ab to point p.
- * 
+ *
  * @hidden
  */
 export function closestPointOnSegment(

@@ -9,14 +9,14 @@
   ],
   "scripts": {
     "clean": "rm -rf dist",
-    "build": "npm run clean && tsc",
+    "build": "yarn run clean && tsc",
     "buildDocs": "typedoc --out docs --mode file --name 'Graphs and Paths' --readme none --module commonjs --target es5 --theme minimal --excludePrivate",
     "jest": "jest --config jest.json",
-    "jest-watch": "npm run jest -- --watch",
+    "jest-watch": "yarn run jest -- --watch",
     "lint": "tslint --project .",
     "prepublish": "npm run build",
-    "test": "npm run lint && npm run jest",
-    "watch": "npm run clean && tsc --watch"
+    "test": "yarn run lint && npm run jest",
+    "watch": "yarn run clean && tsc --watch"
   },
   "repository": {
     "type": "git",
