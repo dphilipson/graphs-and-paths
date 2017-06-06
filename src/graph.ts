@@ -350,8 +350,9 @@ export default class Graph {
     /**
      * @param nodeId A node ID.
      * @returns The `Node` associated with the given ID, or `undefined` if none exists. Note that
-     *          the type signature is a lie (it does not claim to be nullable), but this is
-     *          consistent with other lookup methods such as keyed-indexing.
+     *          the type signature is a lie (it claims to be non-nullable). This is for convenience.
+     *          Lookup will usually be of known node IDs, and this is consistent with the typings
+     *          for index lookup in objects.
      */
     public getNode(nodeId: NodeId): Node {
         return this.nodesById.get(nodeId)!;
@@ -359,7 +360,10 @@ export default class Graph {
 
     /**
      * @param edgeId An edge ID.
-     * @returns The `Edge` associated with the given ID, or throws if none exists.
+     * @returns The `Edge` associated with the given ID, or `undefined` if none exists. Note that
+     *          the type signature is a lie (it claims to be non-nullable). This is for convenience.
+     *          Lookup will usually be of known edge IDs, and this is consistent with the typings
+     *          for index lookup in objects.
      */
     public getEdge(edgeId: EdgeId): Edge {
         return this.edgesById.get(edgeId)!;
@@ -667,8 +671,8 @@ export default class Graph {
     }
 
     /**
-     * Does preprocessing to enable [[getClosestPoint]] by creating a spatial index for mesh of
-     * points along the graph.
+     * Does preprocessing to enable [[getClosestPoint]] by creating a spatial index of points along
+     * the graph.
      *
      * @param precision How fine the mesh should be. Lower precision is more accurate but takes
      *        more time to precompute and more memory. As a rule-of-thumb, [[getClosestPoint]] will
