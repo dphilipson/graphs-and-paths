@@ -1,3 +1,6 @@
+import * as Map from "core-js/library/es6/map";
+import * as Set from "core-js/library/es6/set";
+import * as arrayFrom from "core-js/library/fn/array/from";
 import Heap = require("heap");
 import rbush = require("rbush");
 import knn = require("rbush-knn");
@@ -336,7 +339,7 @@ export default class Graph {
      *          to [[Graph.create]].
      */
     public getAllNodes(): Node[] {
-        return Array.from(this.nodesById.values());
+        return arrayFrom(this.nodesById.values());
     }
 
     /**
@@ -344,7 +347,7 @@ export default class Graph {
      *          to [[Graph.create]].
      */
     public getAllEdges(): Edge[] {
-        return Array.from(this.edgesById.values());
+        return arrayFrom(this.edgesById.values());
     }
 
     /**
@@ -519,7 +522,7 @@ export default class Graph {
                 newEdges.push(newEdge);
             }
         });
-        return Graph.create(Array.from(newNodesById.values()), newEdges);
+        return Graph.create(arrayFrom(newNodesById.values()), newEdges);
     }
 
     /**
