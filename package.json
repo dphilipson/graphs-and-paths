@@ -52,17 +52,17 @@
     "@types/jest": "^16.0.2",
     "@types/rbush": "^2.0.2",
     "husky": "^0.13.4",
-    "jest": "^18.0.0",
+    "jest": "^20.0.4",
     "lint-staged": "^3.6.0",
+    "prettier": "^1.4.2",
     "tslint": "^5.4.2",
     "typedoc": "^0.5.3",
     "typedoc-default-themes": "0.4.0",
     "typescript": "^2.3.4"
   },
   "dependencies": {
-    "es6-shim": "^0.35.2",
+    "es6-shim": "^0.35.3",
     "heap": "^0.2.6",
-    "prettier": "^1.4.2",
     "rbush": "^2.0.1",
     "rbush-knn": "^2.0.0"
   }

@@ -354,7 +354,7 @@ export default class Graph {
      *          consistent with other lookup methods such as keyed-indexing.
      */
     public getNode(nodeId: NodeId): Node {
-        return this.nodesById.get(nodeId);
+        return this.nodesById.get(nodeId)!;
     }
 
     /**
@@ -364,7 +364,7 @@ export default class Graph {
      *          consistent with other lookup methods such as keyed-indexing.
      */
     public getEdge(edgeId: EdgeId): Edge {
-        return this.edgesById.get(edgeId);
+        return this.edgesById.get(edgeId)!;
     }
 
     /**
@@ -548,7 +548,8 @@ export default class Graph {
         const edgeIds = new Set<EdgeId>();
         const pending = [startNode];
         while (pending.length > 0) {
-            const currentNode = pending.pop() as Node; // Not undefined because we just checked the length.
+            // Not undefined because we just checked the length.
+            const currentNode = pending.pop() as Node;
             currentNode.edgeIds.forEach(edgeId => edgeIds.add(edgeId));
             this.getNeighbors(currentNode.id).forEach(neighbor => {
                 if (!nodesIdsSeen.has(neighbor.id)) {
@@ -574,7 +575,8 @@ export default class Graph {
         // This is A*, modified to have two start nodes and two end nodes (the endpoints of the
         // respective edges).
         interface NodeIdWithCost {
-            nodeId: NodeId | null; // null node ID represents the synthetic "goal" node.
+            // null ID represents the synthetic "goal" node.
+            nodeId: NodeId | null;
             cost: number;
         }
         const startEdge = this.getEdgeOrThrow(start.edgeId);
@@ -594,7 +596,7 @@ export default class Graph {
             pendingNodes.push({
                 nodeId: node.id,
                 cost:
-                    distancesFromStart.get(node.id) +
+                    distancesFromStart.get(node.id)! +
                         Utils.distanceBetween(node.location, endLocation),
             });
         const cameFrom = new Map<NodeId, Edge>();
@@ -618,7 +620,7 @@ export default class Graph {
                 doneNodeIds.add(currentNodeId);
                 const currentNodeDistance = distancesFromStart.get(
                     currentNodeId,
-                );
+                )!;
                 this.getEdgesOfNode(currentNodeId).forEach(edge => {
                     const neighbor = this.getOtherEndpoint(
                         edge.id,
