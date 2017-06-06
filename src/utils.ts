@@ -46,7 +46,7 @@ export function findFloorIndex(xs: number[], x: number): number {
     let minIndex = -1;
     let maxIndex = xs.length;
     while (minIndex < maxIndex - 1) {
-        const guessIndex = (minIndex + maxIndex) / 2 | 0;
+        const guessIndex = ((minIndex + maxIndex) / 2) | 0;
         const guess = xs[guessIndex];
         if (guess < x) {
             minIndex = guessIndex;
@@ -60,7 +60,11 @@ export function findFloorIndex(xs: number[], x: number): number {
 }
 
 /** @hidden */
-export function getIntermediateLocation(start: Location, end: Location, distance: number): Location {
+export function getIntermediateLocation(
+    start: Location,
+    end: Location,
+    distance: number,
+): Location {
     const length = distanceBetween(start, end);
     const t = clamp(distance / length, 0, 1);
     return {
@@ -75,7 +79,10 @@ function clamp(x: number, min: number, max: number): number {
 }
 
 /** @hidden */
-export function distanceBetween(location1: Location, location2: Location): number {
+export function distanceBetween(
+    location1: Location,
+    location2: Location,
+): number {
     const dx = location2.x - location1.x;
     const dy = location2.y - location1.y;
     return Math.sqrt(dx * dx + dy * dy);
@@ -102,7 +109,7 @@ export function compareIds(id1: number | string, id2: number | string) {
 /** @hidden */
 export function reversePath(edges: OrientedEdge[]): OrientedEdge[] {
     return edges
-        .map(({edge, isForward}) => ({ edge, isForward: !isForward }))
+        .map(({ edge, isForward }) => ({ edge, isForward: !isForward }))
         .reverse();
 }
 
@@ -116,7 +123,7 @@ export function min<T>(array: T[], comparator: (t1: T, t2: T) => number): T {
     if (array.length === 0) {
         throw new Error("Cannot take minimum of empty array");
     }
-    return array.reduce((a, b) => comparator(a, b) < 0 ? a : b);
+    return array.reduce((a, b) => (comparator(a, b) < 0 ? a : b));
 }
 
 /**
@@ -128,7 +135,7 @@ export function closestPointOnSegment(
     p: Location,
     a: Location,
     b: Location,
-): { distanceDownSegment: number, distanceFromLocation: number } {
+): { distanceDownSegment: number; distanceFromLocation: number } {
     const apX = p.x - a.x;
     const apY = p.y - a.y;
     const abX = b.x - a.x;
@@ -147,7 +154,10 @@ export function closestPointOnSegment(
 }
 
 /** @hidden */
-export function areLocationsEqual(location1: Location, location2: Location): boolean {
+export function areLocationsEqual(
+    location1: Location,
+    location2: Location,
+): boolean {
     return location1.x === location2.x && location1.y === location2.y;
 }
 
@@ -157,12 +167,9 @@ export function dedupeLocations(locations: Location[]): Location[] {
 }
 
 /** @hidden */
-function dedupe<T>(
-    ts: T[],
-    equals = ((t1: T, t2: T) => t1 === t2),
-): T[] {
+function dedupe<T>(ts: T[], equals = (t1: T, t2: T) => t1 === t2): T[] {
     const result: T[] = [];
-    ts.forEach((t) => {
+    ts.forEach(t => {
         if (result.length === 0 || !equals(last(result), t)) {
             result.push(t);
         }
@@ -172,6 +179,6 @@ function dedupe<T>(
 
 /** @hidden */
 export function pushAll<T>(array: T[], toAdd: T[]): T[] {
-    toAdd.forEach((t) => array.push(t));
+    toAdd.forEach(t => array.push(t));
     return array;
 }
