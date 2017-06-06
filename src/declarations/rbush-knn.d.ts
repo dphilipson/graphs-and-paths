@@ -6,8 +6,8 @@ declare module "rbush-knn" {
         x: number,
         y: number,
         k?: number,
-        filterFn?: (t: T) => boolean
+        filterFn?: (t: T) => boolean,
     ): T[];
-    
+
     export = knn;
 }
