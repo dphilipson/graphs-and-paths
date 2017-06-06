@@ -723,6 +723,7 @@ export default class Graph {
         if (this.mesh) {
             return this.getClosestPointWithMesh(location, this.mesh);
         } else {
+            // tslint:disable-next-line:no-console
             console.warn(
                 "getClosestPoint() called on Graph without precomputed mesh. For improved performance, call" +
                     " .withClosestPointMesh() to get a new optimized graph.",
