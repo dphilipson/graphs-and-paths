@@ -359,9 +359,7 @@ export default class Graph {
 
     /**
      * @param edgeId An edge ID.
-     * @returns The `Edge` associated with the given ID, or `undefined` if none exists. Note that
-     *          the type signature is a lie (it does not claim to be nullable), but this is
-     *          consistent with other lookup methods such as keyed-indexing.
+     * @returns The `Edge` associated with the given ID, or throws if none exists.
      */
     public getEdge(edgeId: EdgeId): Edge {
         return this.edgesById.get(edgeId)!;
@@ -725,12 +723,11 @@ export default class Graph {
         if (this.mesh) {
             return this.getClosestPointWithMesh(location, this.mesh);
         } else {
-            // tslint:disable-next-line:no-console
-            console.warn(
-                "getClosestPoint() called on Graph without precomputed mesh. For improved performance, call" +
-                    " .withClosestPointMesh() to get a new optimized graph.",
+            throw new Error(
+                "getClosestPoint() called on a Graph without a precomputed" +
+                    " mesh. To prepare the graph, call .withClosestPointMesh()" +
+                    " first.",
             );
-            return this.getClosestPointWithoutMesh(location);
         }
     }
 
@@ -977,36 +974,5 @@ export default class Graph {
             edgeId,
             distance: locationDistances[locationIndex] + distanceDownSegment,
         };
-    }
-
-    private getClosestPointWithoutMesh(location: Location): EdgePoint {
-        let bestPoint: EdgePoint | null = null;
-        let bestDistance: number = Number.POSITIVE_INFINITY;
-        this.getAllEdges().forEach(edge => {
-            const { locations, locationDistances } = edge;
-            for (let i = 0, limit = locations.length - 1; i < limit; i++) {
-                const {
-                    distanceDownSegment,
-                    distanceFromLocation,
-                } = Utils.closestPointOnSegment(
-                    location,
-                    locations[i],
-                    locations[i + 1],
-                );
-                if (distanceFromLocation < bestDistance) {
-                    bestDistance = distanceFromLocation;
-                    bestPoint = {
-                        edgeId: edge.id,
-                        distance: locationDistances[i] + distanceDownSegment,
-                    };
-                }
-            }
-        });
-        if (bestPoint == null) {
-            throw new Error(
-                "Cannot find closest edge point on graph with no edges",
-            );
-        }
-        return bestPoint;
     }
 }
