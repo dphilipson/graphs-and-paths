@@ -1,9 +1,6 @@
 import * as Map from "core-js/library/es6/map";
 import * as Set from "core-js/library/es6/set";
 import * as arrayFrom from "core-js/library/fn/array/from";
-import Heap = require("heap");
-import rbush = require("rbush");
-import knn = require("rbush-knn");
 import {
     Edge,
     EdgeId,
@@ -18,6 +15,10 @@ import {
 } from "./types";
 import * as Utils from "./utils";
 
+import Heap = require("heap");
+import rbush = require("rbush");
+import knn = require("rbush-knn");
+
 /**
  * Items stored in the RBush tree for quick closest-point retrieval.
  */
@@ -29,16 +30,17 @@ interface MeshPoint {
 }
 
 /**
- * A graph composed of [[Node]]s and [[Edge]]s, representing 2-D spatial points and links between
- * them. Provides methods for reading and analyzing its data.
+ * A graph composed of [[Node]]s and [[Edge]]s, representing 2-D spatial points
+ * and links between them. Provides methods for reading and analyzing its data.
  *
- * The graph and all its data are immutable. No method will modify the `Graph` instance on which it
- * is called, although some will return new instances.
+ * The graph and all its data are immutable. No method will modify the `Graph`
+ * instance on which it is called, although some will return new instances.
  *
- * New `Graph` instances are created using [[Graph.create]], which takes [[SimpleNode]]s and
- * [[SimpleEdge]]s as arguments. Upon construction, the graph creates corresponding [[Node]] and
- * [[Edge]] instances which contain additional information. All `Graph` methods will return these
- * `Node`s rather than the original `SimpleNode`s, and likewise for edges.
+ * New `Graph` instances are created using [[Graph.create]], which takes
+ * [[SimpleNode]]s and [[SimpleEdge]]s as arguments. Upon construction, the
+ * graph creates corresponding [[Node]] and [[Edge]] instances which contain
+ * additional information. All `Graph` methods will return these `Node`s rather
+ * than the original `SimpleNode`s, and likewise for edges.
  *
  * Example usage:
  * ``` javascript
@@ -143,14 +145,15 @@ export default class Graph {
     }
 
     /**
-     * Helper function for computing progress down a path after advancing along it for a given
-     * distance. If the distance is greater than the total length of the path, then advances to
-     * the end of the path. Throws on negative distances.
+     * Helper function for computing progress down a path after advancing along
+     * it for a given distance. If the distance is greater than the total length
+     * of the path, then advances to the end of the path. Throws on negative
+     * distances.
      *
      * @param locations A list of locations representing a path.
      * @param distance A distance down the path.
-     * @returns A new list of locations representing the remaining part of `locations` after
-     *          advancing `distance` along the path.
+     * @returns A new list of locations representing the remaining part of
+     * `locations` after advancing `distance` along the path.
      */
     public static advanceAlongLocations(
         locations: Location[],
@@ -189,13 +192,15 @@ export default class Graph {
     }
 
     /**
-     * Returns a new path obtained by truncating the given path by the provided distance. That is,
-     * the start point of the path moves forward, and any nodes and edges that it passes are
-     * dropped. Throws an error if distance is negative.
+     * Returns a new path obtained by truncating the given path by the provided
+     * distance. That is, the start point of the path moves forward, and any
+     * nodes and edges that it passes are dropped. Throws an error if distance
+     * is negative.
      *
      * @param path A path.
      * @param distance A distance to travel along the path.
-     * @returns The remaining portion of `path` after traveling `distance` along it.
+     * @returns The remaining portion of `path` after traveling `distance` along
+     * it.
      */
     public static advanceAlongPath(path: Path, distance: number): Path {
         const { start, end, orientedEdges, nodes, locations, length } = path;
@@ -244,7 +249,8 @@ export default class Graph {
     }
 
     /**
-     * Returns the path obtained when advancing the given path all the way to the end.
+     * Returns the path obtained when advancing the given path all the way to
+     * the end.
      */
     private static getFinishedPath(path: Path): Path {
         const { end, orientedEdges, locations } = path;
@@ -259,8 +265,8 @@ export default class Graph {
     }
 
     /**
-     * Removes zero-length segments at the start and end of the path caused by the ambiguity of
-     * representing a Node location with an EdgePoint.
+     * Removes zero-length segments at the start and end of the path caused by
+     * the ambiguity of representing a Node location with an EdgePoint.
      */
     private static canonicalizePath(path: Path): Path {
         const { start, end, orientedEdges, nodes } = path;
@@ -335,16 +341,16 @@ export default class Graph {
     ) {}
 
     /**
-     * @returns All the nodes present in this graph, in the order that they were originally provided
-     *          to [[Graph.create]].
+     * @returns All the nodes present in this graph, in the order that they were
+     * originally provided to [[Graph.create]].
      */
     public getAllNodes(): Node[] {
         return arrayFrom(this.nodesById.values());
     }
 
     /**
-     * @returns All the edges present in this graph, in the order that they were originally provided
-     *          to [[Graph.create]].
+     * @returns All the edges present in this graph, in the order that they were
+     * originally provided to [[Graph.create]].
      */
     public getAllEdges(): Edge[] {
         return arrayFrom(this.edgesById.values());
@@ -352,10 +358,11 @@ export default class Graph {
 
     /**
      * @param nodeId A node ID.
-     * @returns The `Node` associated with the given ID, or `undefined` if none exists. Note that
-     *          the type signature is a lie (it claims to be non-nullable). This is for convenience.
-     *          Lookup will usually be of known node IDs, and this is consistent with the typings
-     *          for index lookup in objects.
+     * @returns The `Node` associated with the given ID, or `undefined` if none
+     * exists. Note that the type signature is a lie (it claims to be
+     * non-nullable). This is for convenience. Lookup will usually be of known
+     * node IDs, and this is consistent with the typings for index lookup in
+     * objects.
      */
     public getNode(nodeId: NodeId): Node {
         return this.nodesById.get(nodeId)!;
@@ -363,10 +370,11 @@ export default class Graph {
 
     /**
      * @param edgeId An edge ID.
-     * @returns The `Edge` associated with the given ID, or `undefined` if none exists. Note that
-     *          the type signature is a lie (it claims to be non-nullable). This is for convenience.
-     *          Lookup will usually be of known edge IDs, and this is consistent with the typings
-     *          for index lookup in objects.
+     * @returns The `Edge` associated with the given ID, or `undefined` if none
+     * exists. Note that the type signature is a lie (it claims to be
+     * non-nullable). This is for convenience. Lookup will usually be of known
+     * edge IDs, and this is consistent with the typings for index lookup in
+     * objects.
      */
     public getEdge(edgeId: EdgeId): Edge {
         return this.edgesById.get(edgeId)!;
@@ -395,12 +403,14 @@ export default class Graph {
     }
 
     /**
-     * Given an edge and one of its endpoints, return the other endpoint. Throws if either of the
-     * IDs is nonexistent, or if the node is not an endpoint of the edge.
+     * Given an edge and one of its endpoints, return the other endpoint. Throws
+     * if either of the IDs is nonexistent, or if the node is not an endpoint of
+     * the edge.
      *
      * @param edgeId An edge ID.
      * @param nodeId A node ID, referencing one of the endpoints of the edge.
-     * @returns The node which is the other endpoint of the edge with the given ID.
+     * @returns The node which is the other endpoint of the edge with the given
+     * ID.
      */
     public getOtherEndpoint(edgeId: EdgeId, nodeId: NodeId): Node {
         const edge = this.getEdgeOrThrow(edgeId);
@@ -417,7 +427,8 @@ export default class Graph {
 
     /**
      * @param nodeId A node ID.
-     * @return All nodes which are connected to the node with the given ID by an edge.
+     * @return All nodes which are connected to the node with the given ID by an
+     * edge.
      */
     public getNeighbors(nodeId: NodeId): Node[] {
         return this.getNodeOrThrow(nodeId).edgeIds.map(edgeId =>
@@ -426,10 +437,11 @@ export default class Graph {
     }
 
     /**
-     * Returns the Cartesian coordinates of the point a certain distance along an edge. Does not
-     * throw on out-of-bounds distances. Instead negative distances return the start of the edge
-     * and distances greater than the length return the end of the edge. This is to avoid unexpected
-     * behavior due to floating-point imprecision issues.
+     * Returns the Cartesian coordinates of the point a certain distance along
+     * an edge. Does not throw on out-of-bounds distances. Instead negative
+     * distances return the start of the edge and distances greater than the
+     * length return the end of the edge. This is to avoid unexpected behavior
+     * due to floating-point imprecision issues.
      *
      * @param edgePoint A point specified as a certain distance along an edge.
      * @return The Cartesian coordinates of the given point.
@@ -455,15 +467,16 @@ export default class Graph {
     }
 
     /**
-     * Creates a new `Graph` instance with the same shape but with a reduced number of nodes and
-     * edges. Each instance of multiple nodes and edges in a chain with no forks is converted into a
-     * single edge, where the removed nodes are converted into inner locations of the new edge. In
-     * particular, the new graph will have no nodes of degree 2 except for nodes with only one edge
-     * connecting to themselves. This may significantly increase the speed of certain calculations,
-     * such as [[getShortestPath]].
+     * Creates a new `Graph` instance with the same shape but with a reduced
+     * number of nodes and edges. Each instance of multiple nodes and edges in a
+     * chain with no forks is converted into a single edge, where the removed
+     * nodes are converted into inner locations of the new edge. In particular,
+     * the new graph will have no nodes of degree 2 except for nodes with only
+     * one edge connecting to themselves. This may significantly increase the
+     * speed of certain calculations, such as [[getShortestPath]].
      *
-     * A newly created edge will have the lowest ID of the edges which were combined to form it,
-     * where numbers are considered lower than strings.
+     * A newly created edge will have the lowest ID of the edges which were
+     * combined to form it, where numbers are considered lower than strings.
      *
      * @returns A new coalesced `Graph` instance.
      */
@@ -526,8 +539,8 @@ export default class Graph {
     }
 
     /**
-     * @returns A list of new `Graph` instances, each representing a single connected component of
-     *          this instance.
+     * @returns A list of new `Graph` instances, each representing a single
+     * connected component of this instance.
      */
     public getConnectedComponents(): Graph[] {
         const nodesIdsSeen = new Set<NodeId>();
@@ -544,8 +557,8 @@ export default class Graph {
 
     /**
      * @param nodeId A node ID.
-     * @returns A new `Graph` instance representing the connected component containing the node with
-     *          the given ID.
+     * @returns A new `Graph` instance representing the connected component
+     * containing the node with the given ID.
      */
     public getConnectedComponentOfNode(nodeId: NodeId): Graph {
         const startNode = this.getNodeOrThrow(nodeId);
@@ -570,7 +583,8 @@ export default class Graph {
     }
 
     /**
-     * Returns the shortest path between two points on the graph. Throws if no such path exists.
+     * Returns the shortest path between two points on the graph. Throws if no
+     * such path exists.
      *
      * @param start A point along the graph.
      * @param end Another point along the graph.
@@ -602,7 +616,7 @@ export default class Graph {
                 nodeId: node.id,
                 cost:
                     distancesFromStart.get(node.id)! +
-                        Utils.distanceBetween(node.location, endLocation),
+                    Utils.distanceBetween(node.location, endLocation),
             });
         const cameFrom = new Map<NodeId, Edge>();
         let endEdgeIsForward = true;
@@ -674,12 +688,13 @@ export default class Graph {
     }
 
     /**
-     * Does preprocessing to enable [[getClosestPoint]] by creating a spatial index of points along
-     * the graph.
+     * Does preprocessing to enable [[getClosestPoint]] by creating a spatial
+     * index of points along the graph.
      *
-     * @param precision How fine the mesh should be. Lower precision is more accurate but takes
-     *        more time to precompute and more memory. As a rule-of-thumb, [[getClosestPoint]] will
-     *        be accurate to within `precision` distance.
+     * @param precision How fine the mesh should be. Lower precision is more
+     * accurate but takes more time to precompute and more memory. As a
+     * rule-of-thumb, [[getClosestPoint]] will be accurate to within `precision`
+     * distance.
      * @returns A new `Graph` instance with a spatial index enabled.
      */
     public withClosestPointMesh(precision: number): Graph {
@@ -691,9 +706,8 @@ export default class Graph {
                 const { id: edgeId, startNodeId, locations } = this.getEdge(
                     edgeIds[0],
                 );
-                const locationIndex = startNodeId === node.id
-                    ? 0
-                    : locations.length - 2;
+                const locationIndex =
+                    startNodeId === node.id ? 0 : locations.length - 2;
                 meshPoints.push({ x, y, edgeId, locationIndex });
             }
         });
@@ -718,13 +732,14 @@ export default class Graph {
     }
 
     /**
-     * Returns the closest point on the graph to a given location. This requires the graph to have
-     * a spatial index. To enable this, first use [[withClosestPointMesh]] to obtain a new graph
-     * instance with an index enabled. Calling this method on a graph with no index will throw.
+     * Returns the closest point on the graph to a given location. This requires
+     * the graph to have a spatial index. To enable this, first use
+     * [[withClosestPointMesh]] to obtain a new graph instance with an index
+     * enabled. Calling this method on a graph with no index will throw.
      *
      * @param location A location.
-     * @returns The point on the graph closest to the given location, up to a precision determined
-     *          by the graph's mesh.
+     * @returns The point on the graph closest to the given location, up to a
+     * precision determined by the graph's mesh.
      */
     public getClosestPoint(location: Location): EdgePoint {
         if (this.mesh) {
@@ -756,9 +771,9 @@ export default class Graph {
 
     /**
      * Starting from a given edge, follow along consecutive edges in both
-     * directions as long as there is only one way to do so, i.e. until
-     * reaching a fork. Returns an array of the edges seen, oriented so that
-     * the start edge is oriented forward.
+     * directions as long as there is only one way to do so, i.e. until reaching
+     * a fork. Returns an array of the edges seen, oriented so that the start
+     * edge is oriented forward.
      *
      * In the case of an isolated loop, the returned path will begin and end at
      * the start node of the provided edge.
@@ -806,9 +821,8 @@ export default class Graph {
                 return path;
             } else {
                 const [edgeId1, edgeId2] = nextNode.edgeIds;
-                const nextEdgeId = currentEdge.edge.id === edgeId1
-                    ? edgeId2
-                    : edgeId1;
+                const nextEdgeId =
+                    currentEdge.edge.id === edgeId1 ? edgeId2 : edgeId1;
                 if (nextEdgeId === startEdge.edge.id) {
                     path.push(startEdge);
                     return path;
@@ -835,7 +849,8 @@ export default class Graph {
             return this.getShortestPathOnSameEdge(start, end);
         } else {
             const endEdge = this.getEdgeOrThrow(end.edgeId);
-            // Build nodes, oriented edge, and location lists starting from end, then reverse.
+            // Build nodes, oriented edge, and location lists starting from end,
+            // then reverse.
             const orientedEdges: OrientedEdge[] = [
                 {
                     edge: endEdge,

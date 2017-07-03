@@ -11,7 +11,7 @@ export function getTwoNodes(): Graph {
     const nodeB = { id: "B", location: { x: 1, y: 0 } };
     const edgeAB = { id: "AB", startNodeId: "A", endNodeId: "B" };
     return Graph.create([nodeA, nodeB], [edgeAB]);
-};
+}
 
 export function getTriangle(): Graph {
     const nodes: SimpleNode[] = [
