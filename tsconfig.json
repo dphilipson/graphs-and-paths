@@ -1,28 +1,22 @@
 {
   "compilerOptions": {
-    "declaration": true,
     "lib": [
       "es5",
       "es2015.collection",
       "es2015.iterable"
     ],
     "module": "commonjs",
+    "noEmit": true,
     "noFallthroughCasesInSwitch": true,
-    "noImplicitAny": true,
     "noImplicitReturns": true,
-    "noImplicitThis": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "outDir": "dist/",
     "skipLibCheck": true,
-    "sourceMap": true,
-    "strictNullChecks": true,
+    "strict": true,
     "target": "es5"
   },
-  "files": [
-    "./src/index.ts"
-  ],
   "include": [
-    "./src/declarations/**/*.d.ts"
+    "src/**/*",
+    "__tests__/**/*"
   ]
 }

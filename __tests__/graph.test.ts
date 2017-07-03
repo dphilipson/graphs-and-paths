@@ -1,5 +1,12 @@
 import Graph from "../src/graph";
-import { Edge, EdgePoint, Location, Path, SimpleEdge, SimpleNode } from "../src/types";
+import {
+    Edge,
+    EdgePoint,
+    Location,
+    Path,
+    SimpleEdge,
+    SimpleNode,
+} from "../src/types";
 import * as TestGraphs from "./testGraphs";
 
 describe("constructor", () => {
@@ -65,7 +72,7 @@ describe("getNode()", () => {
     });
 
     it("should return undefined if node does not exist", () => {
-        expect(TestGraphs.getSingleNode().getNode(1)).toBeUndefined;
+        expect(TestGraphs.getSingleNode().getNode(1)).toBeUndefined();
     });
 });
 
@@ -77,15 +84,17 @@ describe("getAllEdges()", () => {
 
     it("should return the edge on a graph with a single edge", () => {
         const edges = TestGraphs.getTwoNodes().getAllEdges();
-        const expected: Edge[] = [{
-            id: "AB",
-            startNodeId: "A",
-            endNodeId: "B",
-            innerLocations: [],
-            length: 1,
-            locations: [{ x: 0, y: 0 }, { x: 1, y: 0 }],
-            locationDistances: [0, 1],
-        }];
+        const expected: Edge[] = [
+            {
+                id: "AB",
+                startNodeId: "A",
+                endNodeId: "B",
+                innerLocations: [],
+                length: 1,
+                locations: [{ x: 0, y: 0 }, { x: 1, y: 0 }],
+                locationDistances: [0, 1],
+            },
+        ];
         expect(edges).toEqual(expected);
     });
 });
@@ -97,30 +106,34 @@ describe("getEdge()", () => {
     });
 
     it("should return undefined if edge does not exist", () => {
-        expect(TestGraphs.getTwoNodes().getEdge(1)).toBeUndefined;
+        expect(TestGraphs.getTwoNodes().getEdge(1)).toBeUndefined();
     });
 });
 
 describe("getEdgesOfNode()", () => {
     it("should return edges with node as their endpoint", () => {
         const edges = TestGraphs.getTriangle().getEdgesOfNode("A");
-        const edgeIds = edges.map((edge) => edge.id).sort();
+        const edgeIds = edges.map(edge => edge.id).sort();
         expect(edgeIds).toEqual(["AB", "CA"]);
     });
 
     it("should throw on nonexistent node ID", () => {
-        expect(() => TestGraphs.getTriangle().getEdgesOfNode(-1)).toThrowError(/-1/);
+        expect(() => TestGraphs.getTriangle().getEdgesOfNode(-1)).toThrowError(
+            /-1/,
+        );
     });
 });
 
 describe("getEndpointsOfEdge()", () => {
     it("should return nodes at ends of edge", () => {
         const endpoints = TestGraphs.getTriangle().getEndpointsOfEdge("CA");
-        expect(endpoints.map((node) => node.id)).toEqual(["C", "A"]);
+        expect(endpoints.map(node => node.id)).toEqual(["C", "A"]);
     });
 
     it("should throw on nonexistent edge ID", () => {
-        expect(() => TestGraphs.getTriangle().getEndpointsOfEdge(-1)).toThrowError(/-1/);
+        expect(() =>
+            TestGraphs.getTriangle().getEndpointsOfEdge(-1),
+        ).toThrowError(/-1/);
     });
 });
 
@@ -131,22 +144,28 @@ describe("getOtherEndpoint()", () => {
     });
 
     it("should throw on nonexistent edge ID", () => {
-        expect(() => TestGraphs.getTwoNodes().getOtherEndpoint("TD", "A")).toThrowError(/TD/);
+        expect(() =>
+            TestGraphs.getTwoNodes().getOtherEndpoint("TD", "A"),
+        ).toThrowError(/TD/);
     });
 
     it("should throw if node is not an endpoint of edge", () => {
-        expect(() => TestGraphs.getTriangle().getOtherEndpoint("AB", "C")).toThrowError(/endpoint/);
+        expect(() =>
+            TestGraphs.getTriangle().getOtherEndpoint("AB", "C"),
+        ).toThrowError(/endpoint/);
     });
 });
 
 describe("getNeighbors()", () => {
     it("should return the neighbors of a node", () => {
         const neighbors = TestGraphs.getTriangle().getNeighbors("A");
-        expect(neighbors.map((node) => node.id).sort()).toEqual(["B", "C"]);
+        expect(neighbors.map(node => node.id).sort()).toEqual(["B", "C"]);
     });
 
     it("should throw nonexistent node ID", () => {
-        expect(() => TestGraphs.getTriangle().getNeighbors("TD")).toThrowError(/TD/);
+        expect(() => TestGraphs.getTriangle().getNeighbors("TD")).toThrowError(
+            /TD/,
+        );
     });
 });
 
@@ -156,7 +175,9 @@ describe("getLocation()", () => {
             { id: "A", location: { x: 10, y: 10 } },
             { id: "B", location: { x: 40, y: 50 } },
         ];
-        const edges: SimpleEdge[] = [{ id: "AB", startNodeId: "A", endNodeId: "B" }];
+        const edges: SimpleEdge[] = [
+            { id: "AB", startNodeId: "A", endNodeId: "B" },
+        ];
         const graph = Graph.create(nodes, edges);
         const distances = [0, 10, 50];
         const expectedLocations: Location[] = [
@@ -164,7 +185,9 @@ describe("getLocation()", () => {
             { x: 16, y: 18 },
             { x: 40, y: 50 },
         ];
-        const actualLocations = distances.map((distance) => graph.getLocation({ edgeId: "AB", distance }));
+        const actualLocations = distances.map(distance =>
+            graph.getLocation({ edgeId: "AB", distance }),
+        );
         expect(actualLocations).toEqual(expectedLocations);
     });
 
@@ -174,12 +197,18 @@ describe("getLocation()", () => {
             { id: "A", location: { x: 0, y: 0 } },
             { id: "B", location: { x: 2, y: 2 } },
         ];
-        const edges: SimpleEdge[] = [{
-            id: "AB",
-            startNodeId: "A",
-            endNodeId: "B",
-            innerLocations: [{ x: 1, y: 0 }, { x: 1, y: 1 }, { x: 2, y: 1 }],
-        }];
+        const edges: SimpleEdge[] = [
+            {
+                id: "AB",
+                startNodeId: "A",
+                endNodeId: "B",
+                innerLocations: [
+                    { x: 1, y: 0 },
+                    { x: 1, y: 1 },
+                    { x: 2, y: 1 },
+                ],
+            },
+        ];
         const graph = Graph.create(nodes, edges);
         const distances = [0, 1, 2.5, 4];
         const expectedLocations: Location[] = [
@@ -188,7 +217,9 @@ describe("getLocation()", () => {
             { x: 1.5, y: 1 },
             { x: 2, y: 2 },
         ];
-        const actualLocations = distances.map((distance) => graph.getLocation({ edgeId: "AB", distance }));
+        const actualLocations = distances.map(distance =>
+            graph.getLocation({ edgeId: "AB", distance }),
+        );
         expect(actualLocations).toEqual(expectedLocations);
     });
 
@@ -199,27 +230,44 @@ describe("getLocation()", () => {
             { id: "A", location: { x: 0, y: 0 } },
             { id: "B", location: { x: 2 / 3, y: 1 / 3 } },
         ];
-        const edges: SimpleEdge[] = [{
-            id: "AB",
-            startNodeId: "A",
-            endNodeId: "B",
-            innerLocations: [{ x: 2 / 3, y: 0 }],
-        }];
+        const edges: SimpleEdge[] = [
+            {
+                id: "AB",
+                startNodeId: "A",
+                endNodeId: "B",
+                innerLocations: [{ x: 2 / 3, y: 0 }],
+            },
+        ];
         const graph = Graph.create(nodes, edges);
         const { length } = graph.getEdge("AB");
-        expect(graph.getLocation({ edgeId: "AB", distance: length })).toEqual({ x: 2 / 3, y: 1 / 3 });
+        expect(graph.getLocation({ edgeId: "AB", distance: length })).toEqual({
+            x: 2 / 3,
+            y: 1 / 3,
+        });
     });
 
     it("should throw on nonexistent edgeId", () => {
-        expect(() => TestGraphs.getTriangle().getLocation({ edgeId: "TD", distance: 0 })).toThrowError(/TD/);
+        expect(() =>
+            TestGraphs.getTriangle().getLocation({ edgeId: "TD", distance: 0 }),
+        ).toThrowError(/TD/);
     });
 
     it("should return start on negative distance", () => {
-        expect(TestGraphs.getTriangle().getLocation({ edgeId: "AB", distance: -1 })).toEqual({ x: 0, y: 0 });
+        expect(
+            TestGraphs.getTriangle().getLocation({
+                edgeId: "AB",
+                distance: -1,
+            }),
+        ).toEqual({ x: 0, y: 0 });
     });
 
     it("should return end on distance greater than edge length", () => {
-        expect(TestGraphs.getTriangle().getLocation({ edgeId: "AB", distance: 10 })).toEqual({ x: 1, y: 0 });
+        expect(
+            TestGraphs.getTriangle().getLocation({
+                edgeId: "AB",
+                distance: 10,
+            }),
+        ).toEqual({ x: 1, y: 0 });
     });
 });
 
@@ -229,7 +277,9 @@ describe("lengths and innerLocationDistances", () => {
             { id: "A", location: { x: 1, y: 1 } },
             { id: "B", location: { x: 4, y: -3 } },
         ];
-        const edges: SimpleEdge[] = [{ id: "AB", startNodeId: "A", endNodeId: "B" }];
+        const edges: SimpleEdge[] = [
+            { id: "AB", startNodeId: "A", endNodeId: "B" },
+        ];
         const edge = Graph.create(nodes, edges).getEdge("AB");
         const expected: Edge = {
             id: "AB",
@@ -248,12 +298,14 @@ describe("lengths and innerLocationDistances", () => {
             { id: "A", location: { x: 0, y: 0 } },
             { id: "B", location: { x: 0, y: 6 } },
         ];
-        const edges: SimpleEdge[] = [{
-            id: "AB",
-            startNodeId: "A",
-            endNodeId: "B",
-            innerLocations: [{ x: 4, y: 3 }],
-        }];
+        const edges: SimpleEdge[] = [
+            {
+                id: "AB",
+                startNodeId: "A",
+                endNodeId: "B",
+                innerLocations: [{ x: 4, y: 3 }],
+            },
+        ];
         const edge = Graph.create(nodes, edges).getEdge("AB");
         const expected: Edge = {
             id: "AB",
@@ -304,12 +356,32 @@ describe("coalesced()", () => {
             { id: "leftArmEnd", location: { x: -2, y: 0 } },
         ];
         const edges: SimpleEdge[] = [
-            { id: "rightArm1", startNodeId: "center", endNodeId: "rightArmJoint" },
-            { id: "rightArm2", startNodeId: "rightArmJoint", endNodeId: "rightArmEnd" },
+            {
+                id: "rightArm1",
+                startNodeId: "center",
+                endNodeId: "rightArmJoint",
+            },
+            {
+                id: "rightArm2",
+                startNodeId: "rightArmJoint",
+                endNodeId: "rightArmEnd",
+            },
             { id: "topArm1", startNodeId: "center", endNodeId: "topArmJoint" },
-            { id: "topArm2", startNodeId: "topArmJoint", endNodeId: "topArmEnd" },
-            { id: "leftArm1", startNodeId: "center", endNodeId: "leftArmJoint" },
-            { id: "leftArm2", startNodeId: "leftArmJoint", endNodeId: "leftArmEnd" },
+            {
+                id: "topArm2",
+                startNodeId: "topArmJoint",
+                endNodeId: "topArmEnd",
+            },
+            {
+                id: "leftArm1",
+                startNodeId: "center",
+                endNodeId: "leftArmJoint",
+            },
+            {
+                id: "leftArm2",
+                startNodeId: "leftArmJoint",
+                endNodeId: "leftArmEnd",
+            },
         ];
         const expectedNodes: SimpleNode[] = [
             { id: "center", location: { x: 0, y: 0 } },
@@ -366,31 +438,37 @@ describe("coalesced()", () => {
             { id: "A", location: { x: 0, y: 0 } },
             { id: "C", location: { x: 3, y: 3 } },
         ];
-        const expectedEdges: SimpleEdge[] = [{
-            id: "AB",
-            startNodeId: "A",
-            endNodeId: "C",
-            innerLocations: [
-                { x: 1, y: 0 },
-                { x: 2, y: 0 },
-                { x: 3, y: 0 },
-                { x: 3, y: 1 },
-                { x: 3, y: 2 },
-            ],
-        }];
+        const expectedEdges: SimpleEdge[] = [
+            {
+                id: "AB",
+                startNodeId: "A",
+                endNodeId: "C",
+                innerLocations: [
+                    { x: 1, y: 0 },
+                    { x: 2, y: 0 },
+                    { x: 3, y: 0 },
+                    { x: 3, y: 1 },
+                    { x: 3, y: 2 },
+                ],
+            },
+        ];
         const graph = Graph.create(nodes, edges).coalesced();
         const expectedGraph = Graph.create(expectedNodes, expectedEdges);
         expectGraphsToBeEqual(graph, expectedGraph);
     });
 
     it("should handle an isolated cycle", () => {
-        const expectedNodes: SimpleNode[] = [{ id: "A", location: { x: 0, y: 0 } }];
-        const expectedEdges: SimpleEdge[] = [{
-            id: "AB",
-            startNodeId: "A",
-            endNodeId: "A",
-            innerLocations: [{ x: 1, y: 0 }, { x: 0, y: 1 }],
-        }];
+        const expectedNodes: SimpleNode[] = [
+            { id: "A", location: { x: 0, y: 0 } },
+        ];
+        const expectedEdges: SimpleEdge[] = [
+            {
+                id: "AB",
+                startNodeId: "A",
+                endNodeId: "A",
+                innerLocations: [{ x: 1, y: 0 }, { x: 0, y: 1 }],
+            },
+        ];
         const graph = TestGraphs.getTriangle().coalesced();
         const expectedGraph = Graph.create(expectedNodes, expectedEdges);
         expectGraphsToBeEqual(graph, expectedGraph);
@@ -417,12 +495,19 @@ describe("getConnectedComponents()", () => {
 
         const nodes: SimpleNode[] = [nodeA, nodeB, nodeO, nodeX, nodeY];
         const edges: SimpleEdge[] = [edgeAB, edgeXY];
-        const expectedNodes: SimpleNode[][] = [[nodeA, nodeB], [nodeO], [nodeX, nodeY]];
+        const expectedNodes: SimpleNode[][] = [
+            [nodeA, nodeB],
+            [nodeO],
+            [nodeX, nodeY],
+        ];
         const expectedEdges: SimpleEdge[][] = [[edgeAB], [], [edgeXY]];
         const components = Graph.create(nodes, edges).getConnectedComponents();
         expect(components.length).toEqual(3);
         for (let i = 0; i < 3; i++) {
-            const expectedComponent = Graph.create(expectedNodes[i], expectedEdges[i]);
+            const expectedComponent = Graph.create(
+                expectedNodes[i],
+                expectedEdges[i],
+            );
             expectGraphsToBeEqual(components[i], expectedComponent);
         }
     });
@@ -456,7 +541,10 @@ describe("getConnectedComponentsForNode()", () => {
         const edges: SimpleEdge[] = [edgeAB, edgeXY];
         const expectedNodes: SimpleNode[] = [nodeA, nodeB];
         const expectedEdges: SimpleEdge[] = [edgeAB];
-        const component = Graph.create(nodes, edges).getConnectedComponentOfNode("A");
+        const component = Graph.create(
+            nodes,
+            edges,
+        ).getConnectedComponentOfNode("A");
         const expectedComponent = Graph.create(expectedNodes, expectedEdges);
         expectGraphsToBeEqual(component, expectedComponent);
     });
@@ -619,7 +707,6 @@ describe("getShortestPath()", () => {
     });
 
     it("should work if start and end are on the same edge but shortest path goes through other edges", () => {
-        const startTime = Date.now();
         const nodes: SimpleNode[] = [
             { id: "A", location: { x: 0, y: 0 } },
             { id: "B", location: { x: 1, y: 0 } },
@@ -663,7 +750,11 @@ describe("getShortestPath()", () => {
 });
 
 describe("advanceAlongLocations()", () => {
-    const locations: Location[] = [{ x: 0, y: 0 }, { x: 1, y: 0 }, { x: 1, y: 1 }];
+    const locations: Location[] = [
+        { x: 0, y: 0 },
+        { x: 1, y: 0 },
+        { x: 1, y: 1 },
+    ];
 
     it("should return same locations if distance is zero", () => {
         const newLocations = Graph.advanceAlongLocations(locations, 0);
@@ -683,7 +774,9 @@ describe("advanceAlongLocations()", () => {
     });
 
     it("should throw on negative distance", () => {
-        expect(() => Graph.advanceAlongLocations(locations, -1)).toThrowError(/negative/);
+        expect(() => Graph.advanceAlongLocations(locations, -1)).toThrowError(
+            /negative/,
+        );
     });
 });
 
@@ -719,10 +812,7 @@ describe("advancePath()", () => {
             end: { edgeId: "CD", distance: 0.5 },
             orientedEdges: [{ edge: graph.getEdge("CD"), isForward: true }],
             nodes: [],
-            locations: [
-                { x: 2.25, y: 0 },
-                { x: 2.5, y: 0 },
-            ],
+            locations: [{ x: 2.25, y: 0 }, { x: 2.5, y: 0 }],
             length: 0.25,
         };
         expect(advanced).toEqual(expected);
@@ -765,7 +855,9 @@ describe("getClosestPoint()", () => {
             { id: "A", location: { x: 0, y: 0 } },
             { id: "B", location: { x: 12, y: 9 } },
         ];
-        const edges: SimpleEdge[] = [{ id: "AB", startNodeId: "A", endNodeId: "B" }];
+        const edges: SimpleEdge[] = [
+            { id: "AB", startNodeId: "A", endNodeId: "B" },
+        ];
         return Graph.create(nodes, edges).withClosestPointMesh(0.25);
     })();
 
@@ -787,6 +879,16 @@ describe("getClosestPoint()", () => {
         expect(closestPoint).toEqual(expected);
     });
 
+    it("should return the closest point if exactly an endpoint of the segment", () => {
+        const closestPoint1 = angledSegment.getClosestPoint({ x: 0, y: 0 });
+        const expected1: EdgePoint = { edgeId: "AB", distance: 0 };
+        expect(closestPoint1).toEqual(expected1);
+
+        const closestPoint2 = angledSegment.getClosestPoint({ x: 12, y: 9 });
+        const expected2: EdgePoint = { edgeId: "AB", distance: 15 };
+        expect(closestPoint2).toEqual(expected2);
+    });
+
     it("should return the closest point among multiple segments", () => {
         const graph = TestGraphs.getTriangle().withClosestPointMesh(0.25);
         const closestPoint = graph.getClosestPoint({ x: 0.125, y: 0.25 });
@@ -799,15 +901,31 @@ describe("getClosestPoint()", () => {
             { id: "A", location: { x: 0, y: 0 } },
             { id: "B", location: { x: 1, y: 0 } },
         ];
-        const edges: SimpleEdge[] = [{
-            id: "AB",
-            startNodeId: "A",
-            endNodeId: "B",
-            innerLocations: [{ x: 0, y: 1 }, { x: 1, y: 1 }],
-        }];
+        const edges: SimpleEdge[] = [
+            {
+                id: "AB",
+                startNodeId: "A",
+                endNodeId: "B",
+                innerLocations: [{ x: 0, y: 1 }, { x: 1, y: 1 }],
+            },
+        ];
         const graph = Graph.create(nodes, edges).withClosestPointMesh(0.25);
         const closestPoint = graph.getClosestPoint({ x: 0.25, y: 2 });
         const expected = { edgeId: "AB", distance: 1.25 };
+        expect(closestPoint).toEqual(expected);
+    });
+
+    it("should work for an edge where start and end are the same location", () => {
+        const nodes: SimpleNode[] = [
+            { id: "A", location: { x: 0, y: 0 } },
+            { id: "B", location: { x: 0, y: 0 } },
+        ];
+        const edges: SimpleEdge[] = [
+            { id: "AB", startNodeId: "A", endNodeId: "B" },
+        ];
+        const graph = Graph.create(nodes, edges).withClosestPointMesh(0.25);
+        const closestPoint = graph.getClosestPoint({ x: 1, y: 1 });
+        const expected = { edgeId: "AB", distance: 0 };
         expect(closestPoint).toEqual(expected);
     });
 });
@@ -830,7 +948,8 @@ function expectGraphsToBeEqual(actual: Graph, expected: Graph): void {
 
 describe("canonicalizePath()", () => {
     // Expose private static method.
-    const canonicalizePath: (path: Path) => Path = (Graph as any).canonicalizePath;
+    const canonicalizePath: (path: Path) => Path = (Graph as any)
+        .canonicalizePath;
 
     it("should leave ordinary path unchanged", () => {
         const graph = TestGraphs.getFourNodes();
@@ -843,7 +962,12 @@ describe("canonicalizePath()", () => {
                 { edge: graph.getEdge("BC"), isForward: true },
                 { edge: graph.getEdge("CD"), isForward: true },
             ],
-            locations: [{ x: 0.5, y: 0 }, { x: 1, y: 0 }, { x: 2, y: 0 }, { x: 2.5, y: 0 }],
+            locations: [
+                { x: 0.5, y: 0 },
+                { x: 1, y: 0 },
+                { x: 2, y: 0 },
+                { x: 2.5, y: 0 },
+            ],
             length: 2,
         };
         const canonPath = canonicalizePath(path);
@@ -923,9 +1047,7 @@ describe("canonicalizePath()", () => {
             start: { edgeId: "BC", distance: 0 },
             end: { edgeId: "BC", distance: 1 },
             nodes: [],
-            orientedEdges: [
-                { edge: graph.getEdge("BC"), isForward: true },
-            ],
+            orientedEdges: [{ edge: graph.getEdge("BC"), isForward: true }],
         };
         const actual = canonicalizePath(path);
         expect(actual).toEqual(expected);

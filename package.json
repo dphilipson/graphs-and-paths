@@ -7,27 +7,6 @@
   "files": [
     "dist/"
   ],
-  "scripts": {
-    "clean": "rm -rf dist",
-    "build": "yarn run clean && tsc",
-    "buildDocs": "typedoc --out docs --mode file --name 'Graphs and Paths' --readme none --module commonjs --target es5 --theme minimal --excludePrivate",
-    "format": "yarn run format-glob -- \"'src/**/*.{ts,tsx}'\"",
-    "format-glob": "prettier --tab-width 4 --trailing-comma all --write",
-    "jest": "jest --config jest.json",
-    "jest-watch": "yarn run jest -- --watch",
-    "lint": "tslint --project .",
-    "precommit": "lint-staged",
-    "prepublish": "yarn run build",
-    "test": "yarn run lint && yarn run jest",
-    "watch": "yarn run clean && tsc --watch"
-  },
-  "lint-staged": {
-    "*.{ts,tsx}": [
-      "format-glob",
-      "yarn run lint -- --fix",
-      "git add"
-    ]
-  },
   "repository": {
     "type": "git",
     "url": "git://github.com/dphilipson/graphs-and-paths.git"
@@ -40,12 +19,44 @@
     "edge",
     "dijkstra"
   ],
-  "author": "David Philipson <dphilipson@gmail.com> (http://dphil.me)",
+  "author": "David Philipson <david.philipson@gmail.com> (http://dphil.me)",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/dphilipson/graphs-and-paths/issues"
   },
   "homepage": "https://github.com/dphilipson/graphs-and-paths#readme",
+  "scripts": {
+    "build": "yarn run clean && tsc -p tsconfig.dist.json",
+    "clean": "rm -rf dist/*",
+    "buildDocs": "typedoc --out docs --mode file --name 'Graphs and Paths' --readme none --module commonjs --target es5 --theme minimal --excludePrivate",
+    "format": "yarn run format-glob -- \"'src/**/*.{ts,tsx}'\"",
+    "format-glob": "prettier --tab-width 4 --trailing-comma all --write",
+    "jest": "jest",
+    "jest-watch": "yarn run jest -- --watch",
+    "lint": "tslint --project .",
+    "precommit": "lint-staged",
+    "prepublish": "yarn run build",
+    "test": "yarn run lint && tsc && yarn run jest"
+  },
+  "jest": {
+    "transform": {
+      ".(ts|tsx)": "<rootDir>/node_modules/ts-jest/preprocessor.js"
+    },
+    "testRegex": "(/__tests__/.*\\.(test|spec))\\.(ts|tsx|js)$",
+    "moduleFileExtensions": [
+      "ts",
+      "tsx",
+      "js"
+    ],
+    "mapCoverage": true
+  },
+  "lint-staged": {
+    "*.{ts,tsx}": [
+      "format-glob",
+      "yarn run lint -- --fix",
+      "git add"
+    ]
+  },
   "devDependencies": {
     "@types/core-js": "^0.9.42",
     "@types/heap": "^0.2.28",
@@ -55,6 +66,7 @@
     "jest": "^20.0.4",
     "lint-staged": "^4.0.0",
     "prettier": "^1.5.2",
+    "ts-jest": "^20.0.6",
     "tslint": "^5.4.3",
     "typedoc": "^0.7.1",
     "typedoc-default-themes": "^0.5.0",

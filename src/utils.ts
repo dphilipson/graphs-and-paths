@@ -1,6 +1,6 @@
 /**
- * Collection of helper methods. These are not exported, and all functions in this file should be
- * marked @hidden.
+ * Collection of helper methods. These are not exported, and all functions in
+ * this file should be marked @hidden.
  */
 import { Location, OrientedEdge } from "./types";
 
@@ -13,10 +13,11 @@ export function last<T>(ts: T[]): T {
 }
 
 /**
- * Given an array of locations representing a path, returns an array of the same size representing
- * the cumulative distance to each location in the input. Specifically, the ith element of the
- * returned array is the distance from the start of the path to its ith location. In particular,
- * this means the first element of the returned array is 0 and the last element is the total length
+ * Given an array of locations representing a path, returns an array of the same
+ * size representing the cumulative distance to each location in the input.
+ * Specifically, the ith element of the returned array is the distance from the
+ * start of the path to its ith location. In particular, this means the first
+ * element of the returned array is 0 and the last element is the total length
  * of the path.
  *
  * @hidden
@@ -36,8 +37,8 @@ export function getCumulativeDistances(path: Location[]): number[] {
 }
 
 /**
- * Assuming xs is sorted, returns the index of the largest element of xs which is at most x. If all
- * elements xs are larger than x, then return -1.
+ * Assuming xs is sorted, returns the index of the largest element of xs which
+ * is at most x. If all elements xs are larger than x, then return -1.
  *
  * @hidden
  */
@@ -136,21 +137,29 @@ export function closestPointOnSegment(
     a: Location,
     b: Location,
 ): { distanceDownSegment: number; distanceFromLocation: number } {
-    const apX = p.x - a.x;
-    const apY = p.y - a.y;
-    const abX = b.x - a.x;
-    const abY = b.y - a.y;
-    const ab2 = abX * abX + abY * abY;
-    const apDotAb = apX * abX + apY * abY;
-    const unclampedT = apDotAb / ab2;
-    const t = clamp(unclampedT, 0, 1);
-    const distanceDownSegment = Math.sqrt(ab2) * t;
-    const closestPoint: Location = {
-        x: a.x + t * abX,
-        y: a.y + t * abY,
-    };
-    const distanceFromLocation = distanceBetween(p, closestPoint);
-    return { distanceDownSegment, distanceFromLocation };
+    if (a.x === b.x && a.y === b.y) {
+        // Segment is zero-length.
+        return {
+            distanceDownSegment: 0,
+            distanceFromLocation: distanceBetween(a, p),
+        };
+    } else {
+        const apX = p.x - a.x;
+        const apY = p.y - a.y;
+        const abX = b.x - a.x;
+        const abY = b.y - a.y;
+        const ab2 = abX * abX + abY * abY;
+        const apDotAb = apX * abX + apY * abY;
+        const unclampedT = apDotAb / ab2;
+        const t = clamp(unclampedT, 0, 1);
+        const distanceDownSegment = Math.sqrt(ab2) * t;
+        const closestPoint: Location = {
+            x: a.x + t * abX,
+            y: a.y + t * abY,
+        };
+        const distanceFromLocation = distanceBetween(p, closestPoint);
+        return { distanceDownSegment, distanceFromLocation };
+    }
 }
 
 /** @hidden */

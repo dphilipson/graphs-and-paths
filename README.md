@@ -2,7 +2,8 @@
 
 Tools for graphs representing 2-D spatial points and links between them.
 
-[![Build Status](https://travis-ci.org/dphilipson/graphs-and-paths.svg?branch=develop)](https://travis-ci.org/dphilipson/graphs-and-paths)
+[![Build
+Status](https://travis-ci.org/dphilipson/graphs-and-paths.svg?branch=develop)](https://travis-ci.org/dphilipson/graphs-and-paths)
 
 ## Demo
 
@@ -10,6 +11,11 @@ Tools for graphs representing 2-D spatial points and links between them.
 
 ## Installation
 
+With Yarn:
+```
+yarn add graphs-and-paths
+```
+With NPM:
 ```
 npm install --save graphs-and-paths
 ```
@@ -51,7 +57,7 @@ graph.getShortestPath(
 //     { x: 2.4, y: 0.8 }
 // ]
 ```
-Many more methods are available.
-[View full documentation](https://dphilipson.github.io/graphs-and-paths) for details.
+Many more methods are available. [View full
+documentation](https://dphilipson.github.io/graphs-and-paths) for details.
 
 Copyright © 2016 David Philipson
