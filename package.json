@@ -1,6 +1,6 @@
 {
   "name": "graphs-and-paths",
-  "version": "0.2.4",
+  "version": "0.2.5",
   "description": "Tools for graphs representing 2-D spatial points and links between them.",
   "main": "dist/index.js",
   "types": "dist/index",
