@@ -26,17 +26,17 @@
   },
   "homepage": "https://github.com/dphilipson/graphs-and-paths#readme",
   "scripts": {
-    "build": "yarn run clean && tsc -p tsconfig.dist.json",
+    "build": "yarn run clean && tsc",
     "clean": "rm -rf dist/*",
-    "buildDocs": "typedoc --out docs --mode file --name 'Graphs and Paths' --readme none --module commonjs --target es5 --theme minimal --excludePrivate",
+    "buildDocs": "typedoc --out docs --mode file --name 'Graphs and Paths' --readme none --module commonjs --target es5 --theme default --excludeNotExported --excludePrivate",
     "format": "yarn run format-glob -- \"'src/**/*.{ts,tsx}'\"",
     "format-glob": "prettier --tab-width 4 --trailing-comma all --write",
     "jest": "jest",
     "jest-watch": "yarn run jest -- --watch",
-    "lint": "tslint --project .",
+    "lint": "tslint -p tsconfig.dev.json",
     "precommit": "lint-staged",
     "prepublish": "yarn run build",
-    "test": "yarn run lint && tsc && yarn run jest"
+    "test": "yarn run lint && tsc -p tsconfig.dev.json && yarn run jest"
   },
   "jest": {
     "transform": {
