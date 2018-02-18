@@ -120,7 +120,10 @@ export function flatMap<T, U>(array: T[], f: (t: T) => U[]): U[] {
 }
 
 /** @hidden */
-export function min<T>(array: T[], comparator: (t1: T, t2: T) => number): T {
+export function arrayMin<T>(
+    array: T[],
+    comparator: (t1: T, t2: T) => number,
+): T {
     if (array.length === 0) {
         throw new Error("Cannot take minimum of empty array");
     }

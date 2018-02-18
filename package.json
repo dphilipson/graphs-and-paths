@@ -1,81 +1,76 @@
 {
-  "name": "graphs-and-paths",
-  "version": "0.2.5",
-  "description": "Tools for graphs representing 2-D spatial points and links between them.",
-  "main": "dist/index.js",
-  "types": "dist/index",
-  "files": [
-    "dist/"
-  ],
-  "repository": {
-    "type": "git",
-    "url": "git://github.com/dphilipson/graphs-and-paths.git"
-  },
-  "keywords": [
-    "graph",
-    "pathfinding",
-    "shortest",
-    "path",
-    "edge",
-    "dijkstra"
-  ],
-  "author": "David Philipson <david.philipson@gmail.com> (http://dphil.me)",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/dphilipson/graphs-and-paths/issues"
-  },
-  "homepage": "https://github.com/dphilipson/graphs-and-paths#readme",
-  "scripts": {
-    "build": "yarn run clean && tsc",
-    "clean": "rm -rf dist/*",
-    "buildDocs": "typedoc --out docs --mode file --name 'Graphs and Paths' --readme none --module commonjs --target es5 --theme default --excludeNotExported --excludePrivate",
-    "format": "yarn run format-glob -- \"'src/**/*.{ts,tsx}'\"",
-    "format-glob": "prettier --tab-width 4 --trailing-comma all --write",
-    "jest": "jest",
-    "jest-watch": "yarn run jest -- --watch",
-    "lint": "tslint -p tsconfig.dev.json",
-    "precommit": "lint-staged",
-    "prepublish": "yarn run build",
-    "test": "yarn run lint && tsc -p tsconfig.dev.json && yarn run jest"
-  },
-  "jest": {
-    "transform": {
-      ".(ts|tsx)": "<rootDir>/node_modules/ts-jest/preprocessor.js"
+    "name": "graphs-and-paths",
+    "version": "0.2.5",
+    "description":
+        "Tools for graphs representing 2-D spatial points and links between them.",
+    "main": "dist/index.js",
+    "types": "dist/index",
+    "files": ["dist/"],
+    "repository": {
+        "type": "git",
+        "url": "git://github.com/dphilipson/graphs-and-paths.git"
     },
-    "testRegex": "(/__tests__/.*\\.(test|spec))\\.(ts|tsx|js)$",
-    "moduleFileExtensions": [
-      "ts",
-      "tsx",
-      "js"
+    "keywords": [
+        "graph",
+        "pathfinding",
+        "shortest",
+        "path",
+        "edge",
+        "dijkstra"
     ],
-    "mapCoverage": true
-  },
-  "lint-staged": {
-    "*.{ts,tsx}": [
-      "format-glob",
-      "yarn run lint -- --fix",
-      "git add"
-    ]
-  },
-  "devDependencies": {
-    "@types/core-js": "^0.9.42",
-    "@types/heap": "^0.2.28",
-    "@types/jest": "^20.0.2",
-    "@types/rbush": "^2.0.2",
-    "husky": "^0.14.2",
-    "jest": "^20.0.4",
-    "lint-staged": "^4.0.0",
-    "prettier": "^1.5.2",
-    "ts-jest": "^20.0.6",
-    "tslint": "^5.4.3",
-    "typedoc": "^0.7.1",
-    "typedoc-default-themes": "^0.5.0",
-    "typescript": "^2.4.1"
-  },
-  "dependencies": {
-    "core-js": "^2.4.1",
-    "heap": "^0.2.6",
-    "rbush": "^2.0.1",
-    "rbush-knn": "^2.0.0"
-  }
+    "author": "David Philipson <david.philipson@gmail.com> (http://dphil.me)",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/dphilipson/graphs-and-paths/issues"
+    },
+    "homepage": "https://github.com/dphilipson/graphs-and-paths#readme",
+    "scripts": {
+        "build": "yarn run clean && tsc -p tsconfig.build.json",
+        "buildDocs":
+            "typedoc --out docs --mode file --name 'Graphs and Paths' --readme none --module commonjs --target es5 --theme default --excludeNotExported --excludePrivate",
+        "clean": "rm -rf dist/*",
+        "format": "prettier --write",
+        "jest": "jest",
+        "jest-watch": "yarn run jest --watch",
+        "lint": "tslint --project .",
+        "lint-fix": "yarn run lint --fix",
+        "precommit": "lint-staged",
+        "prepare": "yarn run build",
+        "test": "yarn run lint && tsc && yarn run jest"
+    },
+    "jest": {
+        "transform": {
+            ".(ts|tsx)": "<rootDir>/node_modules/ts-jest/preprocessor.js"
+        },
+        "testRegex": "(/__tests__/.*\\.(test|spec))\\.(ts|tsx|js)$",
+        "moduleFileExtensions": ["ts", "tsx", "js"],
+        "mapCoverage": true
+    },
+    "lint-staged": {
+        "*.json": ["format", "git add"],
+        "*.{ts,tsx}": ["lint-fix", "format", "git add"],
+        "*.md": ["generate-toc", "git add"]
+    },
+    "devDependencies": {
+        "@types/core-js": "^0.9.46",
+        "@types/heap": "^0.2.28",
+        "@types/jest": "^22.1.3",
+        "@types/rbush": "^2.0.2",
+        "husky": "^0.14.3",
+        "jest": "^22.3.0",
+        "lint-staged": "^6.1.1",
+        "prettier": "^1.10.2",
+        "ts-jest": "^22.0.4",
+        "tslint": "^5.9.1",
+        "tslint-config-prettier": "^1.8.0",
+        "typedoc": "^0.10.0",
+        "typedoc-default-themes": "^0.5.0",
+        "typescript": "^2.7.2"
+    },
+    "dependencies": {
+        "core-js": "^2.5.3",
+        "heap": "^0.2.6",
+        "rbush": "^2.0.2",
+        "rbush-knn": "^2.0.0"
+    }
 }

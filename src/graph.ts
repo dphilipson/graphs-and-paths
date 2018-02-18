@@ -1,6 +1,6 @@
-import * as Map from "core-js/library/es6/map";
-import * as Set from "core-js/library/es6/set";
-import * as arrayFrom from "core-js/library/fn/array/from";
+import Map from "core-js/library/es6/map";
+import Set from "core-js/library/es6/set";
+import arrayFrom from "core-js/library/fn/array/from";
 import {
     Edge,
     EdgeId,
@@ -497,7 +497,7 @@ export default class Graph {
                 const endNodeId = lastEdge.isForward
                     ? lastEdge.edge.endNodeId
                     : lastEdge.edge.startNodeId;
-                const minEdgeId = Utils.min(
+                const minEdgeId = Utils.arrayMin(
                     path.map(pathEdge => pathEdge.edge.id),
                     Utils.compareIds,
                 );
@@ -683,7 +683,9 @@ export default class Graph {
             }
         }
         throw new Error(
-            `No path from starting edge ${start.edgeId} to ending edge ${end.edgeId}`,
+            `No path from starting edge ${start.edgeId} to ending edge ${
+                end.edgeId
+            }`,
         );
     }
 
