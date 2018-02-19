@@ -1,6 +1,7 @@
 {
     "compilerOptions": {
         "esModuleInterop": true,
+        "importHelpers": true,
         "lib": ["es6"],
         "module": "commonjs",
         "noEmit": true,
